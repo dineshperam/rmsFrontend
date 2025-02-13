@@ -4,7 +4,7 @@ import ApiService from "../service/ApiService";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-
+  
   const [loginDetails, setLoginDetails] = useState({
     email: "",
     password: "",
@@ -29,31 +29,45 @@ const LoginPage = () => {
     try {
       const res = await ApiService.loginUser(loginDetails);
       console.log(res);
-
-      if (res.status === 200 && res.active === true) {
-        ApiService.saveToken(res.token);
-        ApiService.saveRole(res.role);
+      
+      if (res.status === 200) {
+        if (!res.active) {
+          showMessage("Account is inactive. Please contact support.");
+          return;
+        }
+        
+        ApiService.saveAuthData(res);
         setMessage(res.message);
 
-        if (res.firstLogin === 1) {
+        if (res.firstLogin) {
           navigate("/changePassword");
         } else {
-          if (ApiService.isArtist()) {
-            navigate("/artistDashboard");
-          } else if (ApiService.isManager()) {
-            navigate("/managerDashboard");
-          } else if (ApiService.isAdmin()) {
-            navigate("/adminDashboard");
-          }
+          redirectToDashboard(res.role);
         }
       } else {
         showMessage("Invalid credentials or inactive account.");
       }
     } catch (error) {
       showMessage(
-        error.response?.data?.message || "Error Logging in a User: " + error
+        error.response?.data?.message || "Error logging in: " + error
       );
       console.log(error);
+    }
+  };
+
+  const redirectToDashboard = (role) => {
+    switch (role) {
+      case "Artist":
+        navigate("/artistDashboard");
+        break;
+      case "Manager":
+        navigate("/managerDashboard");
+        break;
+      case "Admin":
+        navigate("/adminDashboard");
+        break;
+      default:
+        showMessage("Unauthorized role. Contact support.");
     }
   };
 

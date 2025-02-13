@@ -2,16 +2,16 @@ import { Route, Routes } from "react-router-dom";
 
 import OverviewPageArtist from "./pagesArtist/OverviewPageArtist";
 import OverviewPageAdmin from "./pagesAdmin/OverviewPageAdmin";
-import UsersPage from "./pagesAdmin/AllUsersPage";
 import Sidebar from "./components/common/Sidebar";
-import LoginPage from "./pagesAdmin/LoginPage";
 import AllTransPage from "./pagesAdmin/AllTransPage";
 import AllSongsPage from "./pagesAdmin/AllSongsPage";
-import ProfilePage from "./pagesAdmin/ProfilePage";
+import ProfilePage from "./components/common/ProfilePage";
 import ArtistSongsPage from "./pagesArtist/ArtistSongsPage";
 import AddUser from "./components/componentsAdmin/AddUser";
 import AddSong from "./components/componentsArtist/AddSongs";
 import ArtistTrans from "./pagesArtist/ArtistTrans";
+import LoginPage from "./pagesAuth/LoginPage"
+import UsersPage from "./pagesAdmin/AllUsersPage";
 
 function App() {
 	return (
@@ -25,9 +25,13 @@ function App() {
 			<Sidebar />
 			<Routes>
 
-				{/* admin */}
+				{/* auth */}
 
 				<Route path='/' element={<LoginPage />} />
+				<Route path='/changePassword' element={<LoginPage />} />
+
+				{/* admin */}
+				
 				<Route path='/adminDashboard' element={<OverviewPageAdmin />} />
 				<Route path='/allUsers' element={<UsersPage />} />
 				<Route path='/allTransactions' element={<AllTransPage />} />
@@ -40,8 +44,7 @@ function App() {
 				<Route path="/artistSongs" element={<ArtistSongsPage/>}/>
 				<Route path="/addSong" element={<AddSong/>}/>
 				<Route path="/transactionHistory" element={<ArtistTrans/>}/>
-				
-				
+					
 			</Routes>
 		</div>
 	);

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import ApiService from "../../service/ApiService";
-import SettingSection from "./SettingSection";
 import { User } from "lucide-react";
+import ApiService from "../../service/ApiService";
+import SettingSection from "../componentsAdmin/SettingSection";
 
-const ProfileAdmin = () => {
+const Profile = () => {
   const [user, setUser] = useState(null);
   const [message, setMessage] = useState(null);
 
@@ -49,7 +49,7 @@ const ProfileAdmin = () => {
         {user && (
           <div className="p-6 w-full max-w-lg text-white">
             <h1 className="text-2xl font-semibold text-white mb-4 text-center">
-              Hello, {user.firstName} {user.lastName} 🥳
+              Hello, {user.firstName} {user.lastName} 
             </h1><br/>
             <div className="space-y-4 text-white">
               <ProfileItem label="Username" value={user.username} />
@@ -72,4 +72,4 @@ const ProfileItem = ({ label, value }) => (
   </div>
 );
 
-export default ProfileAdmin;
+export default Profile;

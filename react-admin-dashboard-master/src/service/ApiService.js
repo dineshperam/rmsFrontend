@@ -17,11 +17,6 @@ export default class ApiService {
         return bytes.toString(CryptoJS.enc.Utf8);
     }
 
-    static saveToken(token) {
-        const encryptedToken = this.encrypt(token);
-        localStorage.setItem("token", encryptedToken)
-    }
-
     // retreive the token
     static getToken() {
         const encryptedToken = localStorage.getItem("token");
@@ -29,7 +24,9 @@ export default class ApiService {
         return this.decrypt(encryptedToken);
     }
 
-    
+    static getIsFirstLogin(){
+       return localStorage.getItem("isFirstLogin")
+    }
 
     //save Role with encryption
     static saveRole(role) {
@@ -67,12 +64,24 @@ export default class ApiService {
     }
 
 
-    static saveAuthData({ token, userId, role }) {
+    static saveAuthData({ token, userId, role, isFirstLogin, managerId,isActive }) {
         localStorage.setItem("token", this.encrypt(token));
         localStorage.setItem("userId", this.encrypt(userId.toString()));
         localStorage.setItem("role", this.encrypt(role));
-    }
+        localStorage.setItem("isFirstLogin", (isFirstLogin));
+        localStorage.setItem("managerId", this.encrypt(managerId.toString())); // Convert number to string
+        localStorage.setItem("isActive",(isActive));
+    }    
+
+    static getIsActive(){
+        return localStorage.getItem("isActive")
     
+    }
+
+    static getManagerId(){
+        const encryptedManagerId = localStorage.getItem("managerId");
+        return encryptedManagerId ? parseInt(this.decrypt(encryptedManagerId)) : null;
+    }
     
   static getUserId() {
         const encryptedUserId = localStorage.getItem("userId");

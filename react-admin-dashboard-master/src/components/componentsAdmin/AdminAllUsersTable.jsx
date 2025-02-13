@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
+import { motion } from "framer-motion";
 import ApiService from "../../service/ApiService";
 
 const AdminAllUsersTable = () => {
@@ -13,7 +13,9 @@ const AdminAllUsersTable = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch("http://localhost:8080/insights/admin-getall-users",{headers: ApiService.getHeader(),});
+        const response = await fetch("http://localhost:8080/insights/admin-getall-users", {
+          headers: ApiService.getHeader(),
+        });
         if (!response.ok) {
           throw new Error("Failed to fetch users");
         }
@@ -39,6 +41,31 @@ const AdminAllUsersTable = () => {
           user.email.toLowerCase().includes(term)
       )
     );
+  };
+
+  const toggleUserStatus = async (userId) => {
+    try {
+      const response = await fetch(`http://localhost:8080/user/updateStatus/${userId}`, {
+        method: "PUT",
+        headers: ApiService.getHeader(),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update user status");
+      }
+
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.id === userId ? { ...user, status: !user.status } : user
+        )
+      );
+      setFilteredUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.id === userId ? { ...user, status: !user.status } : user
+        )
+      );
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   if (loading) return <div className="text-gray-300">Loading users...</div>;
@@ -105,14 +132,19 @@ const AdminAllUsersTable = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                  <button className="text-indigo-400 hover:text-indigo-300 mr-2">Edit</button>
-                  <button className="text-red-400 hover:text-red-300">Delete</button>
+                  <button
+                    className={user.status ? "text-red-400 hover:text-red-300" : "text-green-400 hover:text-green-300"}
+                    onClick={() => toggleUserStatus(user.id)}
+                  >
+                    {user.status ? "Delete" : "Retrieve"}
+                  </button>
                 </td>
               </motion.tr>
             ))}
           </tbody>
         </table>
       </div>
+      
     </motion.div>
   );
 };

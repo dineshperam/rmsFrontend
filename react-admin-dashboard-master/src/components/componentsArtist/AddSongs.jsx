@@ -1,51 +1,82 @@
 import { useState } from "react";
 import axios from "axios";
 import Header from "../common/Header";
+import ApiService from "../../service/ApiService";
 
 const AddSong = () => {
   const [song, setSong] = useState({
     title: "",
     releaseDate: "",
     collaborators: "",
+    genre:""
   });
-
+ 
   const [message, setMessage] = useState("");
-  const artistId = localStorage.getItem("artistId");
+  const [errors, setErrors] = useState({});
 
+  const artistId = ApiService.getUserId();
+ 
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split("T")[0];
 
+  const genres = ["Pop", "Rock", "Jazz", "Folk", "Classical"];
+
+ 
   const handleChange = (event) => {
     setSong({
       ...song,
       [event.target.name]: event.target.value,
     });
   };
+ 
+  const validateForm = () => {
+    let validationErrors = {};
+    const today = new Date().toISOString().split("T")[0];
+
+    if (!song.title.trim()) {
+      validationErrors.title = "Title is required.";
+    }
+
+    if (!song.genre) {
+      validationErrors.genre = "Genre is required.";
+    }
+
+    if (!song.releaseDate) {
+      validationErrors.releaseDate = "Release date is required.";
+    } else if (song.releaseDate > today) {
+      validationErrors.releaseDate = "Release date cannot be in the future.";
+    }
+
+    setErrors(validationErrors);
+    return Object.keys(validationErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate release date (should not be in the future)
-    if (song.releaseDate > today) {
-      setMessage("Release date cannot be in the future.");
+    if (!validateForm()) {
       return;
     }
+
     try {
       const newSong = { ...song, artistId: artistId };
 
-      await axios.post("http://localhost:8080/artist/addSong", newSong);
-      setMessage("Song added successfully!");
+      await axios.post("http://localhost:8080/artist/addSong", newSong,{
+        headers: ApiService.getHeader(),
+      });
+      setMessage("Song added successfully");
       setSong({
         title: "",
         releaseDate: "",
         collaborators: "",
+        genre: "",
       });
+      setErrors({});
     } catch (error) {
       console.error("Error adding song:", error);
       setMessage("Failed to add song. Please try again.");
     }
   };
-
   return (
     <div className="flex-1 overflow-auto relative z-10 min-h-screen">
       <Header title="Add Song" />
@@ -70,6 +101,7 @@ const AddSong = () => {
               required
               className="w-full p-2 text-black border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
             />
+            {errors.title && <p className="text-red-600 text-sm">{errors.title}</p>}
           </div>
           <div>
             <label className="block text-lg ">Release Date:</label>
@@ -82,6 +114,7 @@ const AddSong = () => {
               required
               className="w-full p-2 text-black border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
             />
+            {errors.releaseDate && <p className="text-red-600 text-sm">{errors.releaseDate}</p>}
           </div>
           <div>
             <label className="block text-lg ">Collaborators:</label>
@@ -93,6 +126,25 @@ const AddSong = () => {
               required
               className="w-full p-2 text-black border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
             />
+           
+          </div>
+          <div>
+            <label className="block text-lg">Genre:</label>
+            <select
+              name="genre"
+              value={song.genre}
+              onChange={handleChange}
+              required
+              className="w-full p-2 text-black border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            >
+              <option value="">Select Genre</option>
+              {genres.map((genre) => (
+                <option key={genre} value={genre}>
+                  {genre}
+                </option>
+              ))}
+            </select>
+            {errors.genre && <p className="text-red-600 text-sm">{errors.genre}</p>}
           </div>
           <button
             type="submit"
@@ -105,5 +157,5 @@ const AddSong = () => {
     </div>
   );
 };
-
+ 
 export default AddSong;

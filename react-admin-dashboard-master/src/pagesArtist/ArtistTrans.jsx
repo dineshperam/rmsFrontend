@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 
 import Header from "../components/common/Header";
-import AllTransactions from "../components/componentsAdmin/AllTransactionsTable";
+import ArtistsTransTable from "../components/componentsArtist/ArtistsTransTable";
 
 const ArtistTrans = () => {
 
@@ -16,8 +16,8 @@ const ArtistTrans = () => {
           transition={{ duration: 1 }}
         >
         </motion.div>
+      <ArtistsTransTable/>
 
-        <AllTransactions />
       </main>
     </div>
   );

@@ -87,13 +87,13 @@ const OverviewPage = () => {
           transition={{ duration: 1 }}
         >
           <StatCard 
-            name="Total Artists" 
+            name="Total Active Artists" 
             icon={Users} 
             value={formatNumber(stats.activeArtists)} 
             color="#6366F1" 
           />
           <StatCard 
-            name="Total Managers" 
+            name="Total Active Managers" 
             icon={Users} 
             value={formatNumber(stats.activeManagers)} 
             color="#8B5CF6" 

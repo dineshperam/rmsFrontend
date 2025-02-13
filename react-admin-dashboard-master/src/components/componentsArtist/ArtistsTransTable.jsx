@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Search } from "lucide-react";
 import ApiService from "../../service/ApiService";
 
-const AllTransactions = () => {
+const ArtistsTransTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [transactions, setTransactions] = useState([]);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
@@ -75,22 +75,24 @@ const AllTransactions = () => {
           <thead>
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Transaction ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">User ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Receiver Id</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Royalty ID</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Transaction Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Amount</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Manager ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Transaction Type</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-700">
             {filteredTransactions.map((transaction) => (
               <motion.tr key={transaction.transactionId} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{transaction.transactionId}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{transaction.userId}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{transaction.receiver}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{transaction.royaltyId}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{new Date(transaction.transactionDate).toLocaleString()}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${transaction.transactionAmount.toFixed(2)}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{transaction.managerId}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{transaction.transactionType}</td>
               </motion.tr>
             ))}
           </tbody>
@@ -100,4 +102,4 @@ const AllTransactions = () => {
   );
 };
 
-export default AllTransactions;
+export default ArtistsTransTable;
