@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import axios from 'axios';
-import Header from '../common/Header';
 
 const AddUser = () => {
     const [user, setUser] = useState({
@@ -96,7 +95,6 @@ const AddUser = () => {
 
     return (
         <div style={styles.container} className="flex-1 overflow-auto relative z-10 min-h-screen" >
-            <Header title="Add User" />
             <main className=" mx-auto py-6 px-4 lg:px-8">
                 {message && <p style={styles.message}>{message}</p>}
                 <form onSubmit={handleSubmit} style={styles.form}>
