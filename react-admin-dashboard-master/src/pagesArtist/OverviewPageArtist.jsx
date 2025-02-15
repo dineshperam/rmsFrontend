@@ -4,6 +4,9 @@ import Header from "../components/common/Header";
 import StatCard from "../components/common/StatCard";
 import { useEffect, useState } from "react";
 import ApiService from "../service/ApiService";
+import TopSongsChart from "../components/componentsArtist/TopSongsChart";
+import GenreDistributionChart from "../components/componentsArtist/GenreDistributionChart";
+import TopSongsTable from "../components/componentsArtist/TopSongsTable"
 
 const OverviewPageArtist = () => {
   
@@ -94,7 +97,13 @@ const OverviewPageArtist = () => {
         </motion.div>
 
         {/* CHARTS */}
-        
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8'>
+        <TopSongsChart/>
+        <GenreDistributionChart/>
+        </div>
+        <div className="w-full">
+          <TopSongsTable />
+        </div>
       </main>
     </div>
   );

@@ -13,12 +13,23 @@ import UsersPage from "./pagesAdmin/AllUsersPage";
 import ChangePassword from "./pagesAuth/ChangePassword";
 import ForgotPassword from "./pagesAuth/ForgotPassword";
 import ApiService from "./service/ApiService";
-import { AdminRoute, ArtistRoute } from "./service/Guard";
+import { AdminRoute, ArtistRoute, ManagerRoute } from "./service/Guard";
 import AddUsers from "./pagesAdmin/AddUsers";
+import AllSongsPageArtist from "./pagesArtist/AllSongsPageArtists";
+import ContactForm from "./pagesAuth/ContactForm";
+import ContactRequestsPage from "./pagesAdmin/ContactRequestsPage";
+
+import ManagerArtistsPage from "./pagesManager/ManagerArtistsPage";
+import ManArtistTransPage from "./pagesManager/ManArtistTransPage";
+import ManagerTransPage from "./pagesManager/ManagerTransPage";
+import OverviewPageManager from "./pagesManager/OverviewPageManager";
+import TopArtistsRevenue from "./components/componentsManager/TopArtistsRevenue";
+import ManagerRequestsPage from "./pagesManager/ManagerRequestsPage";
+import MyManagerPage from "./pagesArtist/MyManagerPage";
 
 function App() {
     const location = useLocation();
-    const isAuthPage = ["/", "/login", "/changePassword", "/forgotPassword"].includes(location.pathname);
+    const isAuthPage = ["/", "/login", "/changePassword", "/forgotPassword","/contactForm"].includes(location.pathname);
     const isAuthenticated = ApiService.isAuthenticated();
 
     return (
@@ -26,7 +37,6 @@ function App() {
             {/* Background */}
             <div className="fixed inset-0 z-0">
                 <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 opacity-80" />
-                <div className="absolute inset-0 backdrop-blur-sm" />
             </div>
 
             {/* Show Sidebar only after login */}
@@ -39,6 +49,7 @@ function App() {
                 <Route path="/changePassword" element={<ChangePassword />} />
                 <Route path="/forgotPassword" element={<ForgotPassword />} />
                 <Route path="/adminInfo" element={<ProfilePage /> } />
+                <Route path="/contactForm" element={<ContactForm /> } />
 
                 {/* Admin Routes */}
                 <Route path="/adminDashboard" element={<AdminRoute element={<OverviewPageAdmin />} />} />
@@ -46,13 +57,23 @@ function App() {
                 <Route path="/allTransactions" element={<AdminRoute element={<AllTransPage />} />} />
                 <Route path="/allSongs" element={<AdminRoute element={<AllSongsPage />} />} />
                 <Route path="/addUser" element={<AdminRoute element={<AddUsers />} />} />
-                
+                <Route path="/contactRequests" element={<AdminRoute element={<ContactRequestsPage />} />} />
 
                 {/* Artist Routes */}
                 <Route path="/artistDashboard" element={<ArtistRoute element={<OverviewPageArtist />} />} />
                 <Route path="/artistSongs" element={<ArtistRoute element={<ArtistSongsPage />} />} />
                 <Route path="/addSong" element={<ArtistRoute element={<AddSong />} />} />
                 <Route path="/transactionHistory" element={<ArtistRoute element={<ArtistTrans />} />} />
+                <Route path="/allArtistSongs" element={<ArtistRoute element={<AllSongsPageArtist />} />} />
+				<Route path="/my-manager-details" element={<MyManagerPage/>}/>
+
+                {/*manager */}
+				<Route path="/manager-dashboard" element={<ManagerRoute element={<OverviewPageManager />} />}/>
+				<Route path="/manager-artists" element={<ManagerRoute element={<ManagerArtistsPage />} />}/>
+				<Route path="/man-artist-trans" element={<ManagerRoute element={<ManArtistTransPage />} />}/>
+				<Route path="/manager-transactions" element={<ManagerRoute element={<ManagerTransPage />} />}/>
+				<Route path="/top-artist-evenue" element={<ManagerRoute element={<TopArtistsRevenue />} />}/>
+				<Route path="/manager-requests"element={<ManagerRoute element={<ManagerRequestsPage />} />}/>
 
                 {/* Redirect unknown routes */}
                 <Route path="*" element={<Navigate to="/" />} />

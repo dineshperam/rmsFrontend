@@ -11,7 +11,9 @@ const SIDEBAR_ITEMS = {
 		{ name: "Transaction History", icon: DollarSign, color: "#10B981", path: "/allTransactions" },
 		{ name: "Add Users", icon: Users, color: "#10B981", path: "/addUser" },
 		{ name: "All Songs", icon: List, color: "#10B981", path: "/allSongs" },
+		{ name: "Contact Requests", icon: UserPen, color: "#6EE7B7", path: "/contactRequests" },
 		{ name: "Admin Profile", icon: UserPen, color: "#6EE7B7", path: "/adminInfo" },
+
 	],
 	Manager: [
 		{ name: "Overview", icon: BarChart2, color: "#6366f1", path: "/managerDashboard" },
@@ -23,7 +25,7 @@ const SIDEBAR_ITEMS = {
 	Artist: [
 		{ name: "Overview", icon: BarChart2, color: "#6366f1", path: "/artistDashboard" },
 		{ name: "Artist's Songs", icon: List, color: "#10B981", path: "/artistSongs" },
-		{ name: "List of all songs", icon: List, color: "#10B981", path: "/allSongs" },
+		{ name: "List of all songs", icon: List, color: "#10B981", path: "/allArtistSongs" },
 		{ name: "Add Song", icon: CirclePlus, color: "#10B981", path: "/addSong" },
 		{ name: "Transaction History", icon: DollarSign, color: "#10B981", path: "/transactionHistory" },
 		{ name: "Artist's Profile", icon: UserPen, color: "#6EE7B7", path: "/adminInfo" },

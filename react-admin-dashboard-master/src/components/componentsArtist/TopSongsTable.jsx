@@ -15,8 +15,8 @@ const ArtistSongs = () => {
             try {
                 const artistId = ApiService.getUserId();
                 const response = await fetch(`http://localhost:8080/insights/top-songs-artist-table/${artistId}`, {
-                    headers: ApiService.getHeader(),
-                });
+                          headers: ApiService.getHeader(),
+                    });
                 const artistSongs = await response.json();
                 setSongs(artistSongs);
                 setFilteredSongs(artistSongs);
@@ -53,7 +53,7 @@ const ArtistSongs = () => {
             transition={{ delay: 0.2 }}
         >
             <div className='flex justify-between items-center mb-6'>
-                <h2 className='text-xl font-semibold text-gray-100'>My Songs</h2>
+                <h2 className='text-xl font-semibold text-gray-100'>My Top Songs</h2>
                 <div className='relative'>
                     <input
                         type='text'
