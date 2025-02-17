@@ -18,14 +18,18 @@ import AddUsers from "./pagesAdmin/AddUsers";
 import AllSongsPageArtist from "./pagesArtist/AllSongsPageArtists";
 import ContactForm from "./pagesAuth/ContactForm";
 import ContactRequestsPage from "./pagesAdmin/ContactRequestsPage";
-
-import ManagerArtistsPage from "./pagesManager/ManagerArtistsPage";
-import ManArtistTransPage from "./pagesManager/ManArtistTransPage";
-import ManagerTransPage from "./pagesManager/ManagerTransPage";
-import OverviewPageManager from "./pagesManager/OverviewPageManager";
-import TopArtistsRevenue from "./components/componentsManager/TopArtistsRevenue";
-import ManagerRequestsPage from "./pagesManager/ManagerRequestsPage";
 import MyManagerPage from "./pagesArtist/MyManagerPage";
+import OverviewPageManager from "./pagesManager/OverviewPageManager";
+import ManagerArtistsPage from "./pagesManager/ManagerArtistsPage" 
+import ManArtistTransPage from "./pagesManager/ManArtistTransPage"
+import ManagerTransPage from "./pagesManager/ManagerTransPage"
+import TopArtistsRevenue from "./components/componentsManager/TopArtistsRevenue"
+import ManagerRequestsPage from "./pagesManager/ManagerRequestsPage"
+import AllSongsPageManager from "./pagesManager/AllSongsPageManager";
+import RoyaltiesPage from "./pagesAdmin/RoyaltiesPage";
+import ArtistRequestsPage from "./pagesArtist/ArtistRequestsPage";
+import UpdateProfilePage from "./components/common/UpdateProfilePage";
+
 
 function App() {
     const location = useLocation();
@@ -48,8 +52,9 @@ function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/changePassword" element={<ChangePassword />} />
                 <Route path="/forgotPassword" element={<ForgotPassword />} />
-                <Route path="/adminInfo" element={<ProfilePage /> } />
+                <Route path="/myInfo" element={<ProfilePage /> } />
                 <Route path="/contactForm" element={<ContactForm /> } />
+                <Route path="/update-profile" element={<UpdateProfilePage/>}/>
 
                 {/* Admin Routes */}
                 <Route path="/adminDashboard" element={<AdminRoute element={<OverviewPageAdmin />} />} />
@@ -57,23 +62,28 @@ function App() {
                 <Route path="/allTransactions" element={<AdminRoute element={<AllTransPage />} />} />
                 <Route path="/allSongs" element={<AdminRoute element={<AllSongsPage />} />} />
                 <Route path="/addUser" element={<AdminRoute element={<AddUsers />} />} />
+                <Route path="/royalties" element={<AdminRoute element={<RoyaltiesPage />} />}/>
                 <Route path="/contactRequests" element={<AdminRoute element={<ContactRequestsPage />} />} />
 
                 {/* Artist Routes */}
                 <Route path="/artistDashboard" element={<ArtistRoute element={<OverviewPageArtist />} />} />
                 <Route path="/artistSongs" element={<ArtistRoute element={<ArtistSongsPage />} />} />
+                <Route path="/allArtistSongs" element={<ArtistRoute element={<AllSongsPageArtist />} />} />
                 <Route path="/addSong" element={<ArtistRoute element={<AddSong />} />} />
                 <Route path="/transactionHistory" element={<ArtistRoute element={<ArtistTrans />} />} />
-                <Route path="/allArtistSongs" element={<ArtistRoute element={<AllSongsPageArtist />} />} />
+                <Route path="/artist-requests" element={<ArtistRoute element={<ArtistRequestsPage />} />} />
 				<Route path="/my-manager-details" element={<MyManagerPage/>}/>
+                
 
                 {/*manager */}
-				<Route path="/manager-dashboard" element={<ManagerRoute element={<OverviewPageManager />} />}/>
-				<Route path="/manager-artists" element={<ManagerRoute element={<ManagerArtistsPage />} />}/>
+				<Route path="/managerDashboard" element={<ManagerRoute element={<OverviewPageManager />} />}/>
+                <Route path="/all-Msongs" element={<ManagerRoute element={<AllSongsPageManager />} />} />
+                <Route path="/manager-artists" element={<ManagerRoute element={<ManagerArtistsPage />} />}/>
 				<Route path="/man-artist-trans" element={<ManagerRoute element={<ManArtistTransPage />} />}/>
 				<Route path="/manager-transactions" element={<ManagerRoute element={<ManagerTransPage />} />}/>
 				<Route path="/top-artist-evenue" element={<ManagerRoute element={<TopArtistsRevenue />} />}/>
 				<Route path="/manager-requests"element={<ManagerRoute element={<ManagerRequestsPage />} />}/>
+                
 
                 {/* Redirect unknown routes */}
                 <Route path="*" element={<Navigate to="/" />} />

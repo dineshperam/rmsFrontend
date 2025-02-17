@@ -1,5 +1,4 @@
 import Header from "../components/common/Header";
-import Security from "../components/componentsAdmin/Security";
 import MyManager from "../components/componentsArtist/MyManager";
 
 const MyManagerPage = () => {
@@ -8,8 +7,6 @@ const MyManagerPage = () => {
 			<Header title='Settings' />
 			<main className='max-w-4xl mx-auto py-6 px-4 lg:px-8'>
                 <MyManager/>
-				
-				<Security />
 			</main>
 		</div>
 	);

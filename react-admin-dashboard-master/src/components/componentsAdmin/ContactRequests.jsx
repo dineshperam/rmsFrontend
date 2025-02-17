@@ -33,10 +33,15 @@ const ContactRequests = () => {
         : `http://localhost:8080/api/contact/reject/${contactId}`;
       
       const response = await axios.put(url);
+  
       if (response.status === 200) {
-        alert(`Request ${action}ed.`);
-        setRequests(requests.filter(request => request.id !== contactId));
-        setFilteredRequests(filteredRequests.filter(request => request.id !== contactId));
+        if (response.data === "Email already exists. Cannot create a new user.") {
+          alert(response.data); // Show error if email exists
+        } else {
+          alert(`Request ${action}ed.`);
+          setRequests(requests.filter(request => request.id !== contactId));
+          setFilteredRequests(filteredRequests.filter(request => request.id !== contactId));
+        }
       }
     } catch (error) {
       console.error(`Error ${action}ing request:`, error);
@@ -44,6 +49,7 @@ const ContactRequests = () => {
     }
     setLoadingAction({ id: null, type: null });
   };
+  
 
   const handleSearch = (e) => {
     const term = e.target.value.toLowerCase();

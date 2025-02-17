@@ -15,7 +15,7 @@ const BarChartArtists = () => {
                 const artistsResponse = await fetch(`http://localhost:8080/user/getArtistUnderManager/${manId}`, {
                     headers: ApiService.getHeader(),
                 });
-                alert(JSON.stringify(artistsResponse))
+                // alert(JSON.stringify(artistsResponse))
 
                 if (!artistsResponse.ok) {
                     throw new Error(`Artists API Error: ${artistsResponse.status}`);

@@ -3,7 +3,7 @@ import CryptoJS from "crypto-js";
 
 export default class ApiService {
     static BASE_URL = "http://localhost:8080";
-    static ENCRYPTION_KEY = "dinesh-dev-royalty";
+    static ENCRYPTION_KEY = "mint-dev-royalty";
 
 
     //encrypt data using cryptoJs
@@ -64,13 +64,14 @@ export default class ApiService {
     }
 
 
-    static saveAuthData({ token, userId, role, isFirstLogin, managerId,isActive }) {
+    static saveAuthData({ token, userId, role, isFirstLogin, managerId, isActive, expirationTime }) {
         localStorage.setItem("token", this.encrypt(token));
         localStorage.setItem("userId", this.encrypt(userId.toString()));
         localStorage.setItem("role", this.encrypt(role));
         localStorage.setItem("isFirstLogin", (isFirstLogin));
         localStorage.setItem("managerId", this.encrypt(managerId.toString())); // Convert number to string
         localStorage.setItem("isActive",(isActive));
+        localStorage.setItem("expirationTime", (expirationTime))
     }    
 
     static getIsActive(){
@@ -87,8 +88,19 @@ export default class ApiService {
         const encryptedUserId = localStorage.getItem("userId");
         return encryptedUserId ? parseInt(this.decrypt(encryptedUserId)) : null;
     }
-    
-    
+
+    static async updateUserProfile(userDetails) {
+        try {
+            const response = await axios.put(`${this.BASE_URL}/user/update`, userDetails, {
+                headers: this.getHeader(),
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error updating user:", error);
+            throw error;
+        }
+    }
+          
     static async loginUser(loginData) {
         const response = await axios.post(`${this.BASE_URL}/auth/login`, loginData);
         if (response.data.token) {
@@ -201,6 +213,17 @@ static async getManagerRequests(managerId) {
     }
 }
 
+// ✅ Get artist-partnership record
+static async getArtistPartnership(artistId) {
+    try {
+        const response = await axios.get(`${this.BASE_URL}/partnerships/latest/${artistId}`, { headers: this.getHeader() });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching manager requests:", error);
+        throw error;
+    }
+}
+
 // ✅ Accept or reject a partnership request
 static async respondToPartnershipRequest(requestId, status) {
     try {
@@ -242,6 +265,62 @@ static async payRoyalty(royaltyId, adminId) {
     return await response.json();
 }
 
+static async exportTransByUsersPDF(userId) {
+    try {
+        const response = await axios.get(`${this.BASE_URL}/trans/exportPDF/${userId}`, {
+            headers: this.getHeader(),
+            responseType: "blob",
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error("Error exporting transactions PDF:", error);
+        throw error;
+    }
+}
+
+static async exportTransByManagerPDF(managerId) {
+    try {
+        const response = await axios.get(`${this.BASE_URL}/trans/exportPDF/manager/${managerId}`, {
+            headers: this.getHeader(),
+            responseType: "blob",
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error("Error exporting manager transactions PDF:", error);
+        throw error;
+    }
+}
+static async exportPartnershipPDF(artistId) {
+    try {
+        const response = await axios.get(`${this.BASE_URL}/partnerships/export-pdf-partner/${artistId}`, {
+            headers: this.getHeader(),
+            responseType: "blob",
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error("Error exporting contract PDF:", error);
+        throw error;
+    }
+}
+
+static async exportTransPDF() {
+    try {
+        const response = await axios.get(`${this.BASE_URL}/trans/export-pdf`, {
+            headers: this.getHeader(),
+            responseType: "blob",
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error("Error exporting transactions PDF:", error);
+        throw error;
+    }
+}
+
+
     /**AUTHENTICATION CHECKER */
     static logout(){
         this.clearAuth()
@@ -274,5 +353,71 @@ static async payRoyalty(royaltyId, adminId) {
         return response.data;
     }
 
+    static async getManagerInfo() {
+        const managerId = this.getManagerId();
+        if (!managerId) {
+            console.error("Manager ID not found in localStorage.");
+            return null;
+        }
+    
+        try {
+            const response = await axios.get(`${this.BASE_URL}/user/searchUser/${managerId}`, {
+                headers: this.getHeader()
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching manager info:", error);
+            return null;
+        }
+    }
+
+    static async setSessionExpirationTimer() {
+        const sessionDuration = 10000; // Session duration (10,000 ms)
+        const loginTime = localStorage.getItem('expirationTime');
+    
+        if (!loginTime) {
+            console.error("Login time not found in localStorage.");
+            return;
+        }
+    
+        const timeElapsed = Date.now() - parseInt(loginTime, 10);
+        
+        if (timeElapsed >= sessionDuration) {
+            // If the session has expired, show custom dialog and log out
+            this.showSessionExpiredDialog();
+        } else {
+            // Set timeout to trigger expiration after the remaining time
+            setTimeout(() => {
+                this.showSessionExpiredDialog();
+            }, sessionDuration - timeElapsed);
+        }
+    }
+    
+    static showSessionExpiredDialog() {
+        const dialog = document.createElement('div');
+        dialog.innerHTML = `
+            <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center;">
+                <div style="background: white; padding: 20px; border-radius: 5px; text-align: center;">
+                    <h2>Session Expired</h2>
+                    <p>Please log in again.</p>
+                    <button id="session-expired-btn" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">Login</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(dialog);
+        
+        document.getElementById("session-expired-btn").addEventListener("click", () => {
+            this.clearSessionAndRedirect();
+        });
+    }
+    
+    static clearSessionAndRedirect() {
+        localStorage.removeItem('expirationTime');
+        localStorage.removeItem('role');
+        localStorage.clear();
+        window.location.href = "/login"; // Ensure navigation on session expiry
+    }
+    
+    
 
 }

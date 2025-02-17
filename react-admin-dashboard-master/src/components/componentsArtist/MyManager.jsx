@@ -39,7 +39,7 @@ const MyManager = () => {
   };
 
   return (
-    <SettingSection icon={User} title="ManagerProfile">
+    <SettingSection icon={User} title="My Manager Profile">
       <div className="flex flex-col items-center p-6">
         {message && (
           <div className="bg-red-100 text-red-600 p-3 mb-4 rounded-md border border-red-400">
@@ -50,7 +50,7 @@ const MyManager = () => {
         {user && (
           <div className="p-6 w-full max-w-lg text-white">
             <h1 className="text-2xl font-semibold text-white mb-4 text-center">
-              Hello, {user.firstName} {user.lastName} 🥳
+              {user.firstName} {user.lastName}
             </h1><br/>
             <div className="space-y-4 text-white">
               <ProfileItem label="Username" value={user.username} />

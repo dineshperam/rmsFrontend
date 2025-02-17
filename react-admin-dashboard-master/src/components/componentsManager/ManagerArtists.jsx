@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { Search, Download } from "lucide-react";
 import axios from "axios";
 import ApiService from "../../service/ApiService";
 
@@ -11,12 +11,14 @@ const ManagerArtists = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-    const managerId = ApiService.getManagerId()
+  const managerId = ApiService.getManagerId();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8080/user/getArtistUnderManager/${managerId}`,{
+          `http://localhost:8080/user/getArtistUnderManager/${managerId}`,
+          {
             headers: ApiService.getHeader(),
           }
         );
@@ -42,6 +44,28 @@ const ManagerArtists = () => {
           artist.email.toLowerCase().includes(term)
       )
     );
+  };
+
+  const exportPartnershipPDF = async (artistId) => {
+    try {
+      const response = await axios.get(
+        `${ApiService.BASE_URL}/partnerships/export-pdf-partner/${artistId}`,
+        {
+          headers: ApiService.getHeader(),
+          responseType: "blob",
+        }
+      );
+
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `partnership_contract_${artistId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error exporting contract PDF:", error);
+    }
   };
 
   if (loading) return <div className="text-gray-300">Loading artists...</div>;
@@ -79,6 +103,7 @@ const ManagerArtists = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Email</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Address</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Mobile No</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Contract</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-700">
@@ -90,6 +115,14 @@ const ManagerArtists = () => {
                   <td className="px-6 py-4 text-sm text-gray-300">{artist.email}</td>
                   <td className="px-6 py-4 text-sm text-gray-300">{artist.address}</td>
                   <td className="px-6 py-4 text-sm text-gray-300">{artist.mobileNo}</td>
+                  <td className="px-6 py-4 text-sm">
+                    <button
+                      onClick={() => exportPartnershipPDF(artist.userid)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+                    >
+                      <Download size={18} />
+                    </button>
+                  </td>
                 </motion.tr>
               ))}
             </tbody>

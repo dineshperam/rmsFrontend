@@ -1,4 +1,4 @@
-import { BarChart2, CirclePlus, DollarSign, List, LogOut, Menu, UserPen, Users } from "lucide-react";
+import { BarChart2, CirclePlus, DollarSign, List, LogOut, Menu, UserPen, UserPlus, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -11,16 +11,19 @@ const SIDEBAR_ITEMS = {
 		{ name: "Transaction History", icon: DollarSign, color: "#10B981", path: "/allTransactions" },
 		{ name: "Add Users", icon: Users, color: "#10B981", path: "/addUser" },
 		{ name: "All Songs", icon: List, color: "#10B981", path: "/allSongs" },
+		{ name: "Royalties", icon: DollarSign, color: "#10B981", path: "/royalties" },
 		{ name: "Contact Requests", icon: UserPen, color: "#6EE7B7", path: "/contactRequests" },
-		{ name: "Admin Profile", icon: UserPen, color: "#6EE7B7", path: "/adminInfo" },
+		{ name: "Admin Profile", icon: UserPen, color: "#6EE7B7", path: "/myInfo" },
 
 	],
 	Manager: [
 		{ name: "Overview", icon: BarChart2, color: "#6366f1", path: "/managerDashboard" },
-		{ name: "List of all songs", icon: List, color: "#EC4899", path: "/allSongs" },
-		{ name: "Artists Under Manager", icon: Users, color: "#EC4899", path: "/managerArtists" },
-		{ name: "Artist's Transactions", icon: DollarSign, color: "#10B981", path: "/managerTransactions" },
-		{ name: "Manager Profile", icon: UserPen, color: "#6EE7B7", path: "/adminInfo" },
+		{ name: "List of all songs", icon: List, color: "#EC4899", path: "/all-Msongs" },
+		{ name: "Artists Under Manager", icon: Users, color: "#EC4899", path: "/manager-artists" },
+		{ name: "Artist's Transactions", icon: DollarSign, color: "#10B981", path: "/man-artist-trans" },
+		{ name: "My Transactions", icon: DollarSign, color: "#10B981", path: "/manager-transactions" },
+		{ name: "Partnership Requests", icon: Users, color: "#6EE7B7", path: "/manager-requests" },
+		{ name: "Manager Profile", icon: UserPen, color: "#6EE7B7", path: "/myInfo" },
 	],
 	Artist: [
 		{ name: "Overview", icon: BarChart2, color: "#6366f1", path: "/artistDashboard" },
@@ -28,7 +31,9 @@ const SIDEBAR_ITEMS = {
 		{ name: "List of all songs", icon: List, color: "#10B981", path: "/allArtistSongs" },
 		{ name: "Add Song", icon: CirclePlus, color: "#10B981", path: "/addSong" },
 		{ name: "Transaction History", icon: DollarSign, color: "#10B981", path: "/transactionHistory" },
-		{ name: "Artist's Profile", icon: UserPen, color: "#6EE7B7", path: "/adminInfo" },
+		{ name: "Partnerships", icon: UserPlus, color: "#6EE7B7", path: "/artist-requests" },
+		{ name: "Manager's Profile", icon: Users, color: "#6EE7B7", path: "/my-manager-details" },
+		{ name: "Artist's Profile", icon: UserPen, color: "#6EE7B7", path: "/myInfo" },
 	],
 };
 

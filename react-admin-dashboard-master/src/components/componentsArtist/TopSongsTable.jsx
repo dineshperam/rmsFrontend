@@ -53,7 +53,7 @@ const ArtistSongs = () => {
             transition={{ delay: 0.2 }}
         >
             <div className='flex justify-between items-center mb-6'>
-                <h2 className='text-xl font-semibold text-gray-100'>My Top Songs</h2>
+                <h2 className='text-xl font-semibold text-gray-100'>My Top Songs List</h2>
                 <div className='relative'>
                     <input
                         type='text'

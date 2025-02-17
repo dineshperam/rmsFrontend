@@ -30,7 +30,7 @@ const TopSongsChart = () => {
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ delay: 0.4 }}
 		>
-			<h2 className='text-xl font-semibold text-gray-100 mb-4'>Top 5 Songs Based on Streams</h2>
+			<h2 className='text-xl font-semibold text-gray-100 mb-4'>My Top Songs Based on Streams</h2>
 
 			<div style={{ width: "100%", height: 300 }}>
 				<ResponsiveContainer>
