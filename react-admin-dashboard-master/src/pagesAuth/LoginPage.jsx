@@ -126,7 +126,7 @@ const LoginPage = () => {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h2>Login</h2>
+        <h2 className="text-black-800">Login</h2>
         <input
           type="email"
           name="email"

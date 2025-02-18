@@ -251,6 +251,16 @@ static async respondToPartnershipRequest(requestId, status) {
     return await response.json();
 }
 
+static async getPendingPartnershipRequest(artistId) {
+    try {
+        const response = await axios.get(`/partnerships/pending/${artistId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching pending partnership request:", error);
+        throw error;
+    }
+}
+
 static async payRoyalty(royaltyId, adminId) {
     const response = await fetch(`${this.BASE_URL}/royalty/payRoyalty/${royaltyId}/${adminId}`, {
         method: "PUT",
@@ -392,6 +402,8 @@ static async exportTransPDF() {
             }, sessionDuration - timeElapsed);
         }
     }
+
+    
     
     static showSessionExpiredDialog() {
         const dialog = document.createElement('div');
