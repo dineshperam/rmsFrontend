@@ -1,40 +1,49 @@
 import { Route, Routes, Navigate, useLocation } from "react-router-dom";
-import OverviewPageArtist from "./pagesArtist/OverviewPageArtist";
-import OverviewPageAdmin from "./pagesAdmin/OverviewPageAdmin";
-import Sidebar from "./components/common/Sidebar";
-import AllTransPage from "./pagesAdmin/AllTransPage";
-import AllSongsPage from "./pagesAdmin/AllSongsPage";
-import ProfilePage from "./components/common/ProfilePage";
-import ArtistSongsPage from "./pagesArtist/ArtistSongsPage";
-import AddSong from "./components/componentsArtist/AddSongs";
-import ArtistTrans from "./pagesArtist/ArtistTrans";
-import LoginPage from "./pagesAuth/LoginPage";
-import UsersPage from "./pagesAdmin/AllUsersPage";
-import ChangePassword from "./pagesAuth/ChangePassword";
-import ForgotPassword from "./pagesAuth/ForgotPassword";
+import OverviewPageArtist from "./pagesArtist/OverviewPageArtist/OverviewPageArtist";
+import OverviewPageAdmin from "./pagesAdmin/OverviewPage/OverviewPageAdmin";
+import Sidebar from "./components/common/Sidebar/Sidebar";
+import AllTransPage from "./pagesAdmin/AllTransPage/AllTransPage";
+import AllSongsPage from "./pagesAdmin/AllSongsPage/AllSongsPage";
+import ProfilePage from "./components/common/Profile/ProfilePage";
+import ArtistSongsPage from "./pagesArtist/ArtistSongsPage/ArtistSongsPage";
+import AddSong from "./components/componentsArtist/AddSong/AddSongs";
+import ArtistTrans from "./pagesArtist/ArtistTrans/ArtistTrans";
+import LoginPage from "./pagesAuth/LoginPage/LoginPage";
+import UsersPage from "./pagesAdmin/UsersPage/AllUsersPage";
+import ChangePassword from "./pagesAuth/ChangePassword/ChangePassword";
+import ForgotPassword from "./pagesAuth/ForgotPassword/ForgotPassword";
 import ApiService from "./service/ApiService";
 import { AdminRoute, ArtistRoute, ManagerRoute } from "./service/Guard";
-import AddUsers from "./pagesAdmin/AddUsers";
-import AllSongsPageArtist from "./pagesArtist/AllSongsPageArtists";
-import ContactForm from "./pagesAuth/ContactForm";
-import ContactRequestsPage from "./pagesAdmin/ContactRequestsPage";
-import MyManagerPage from "./pagesArtist/MyManagerPage";
-import OverviewPageManager from "./pagesManager/OverviewPageManager";
-import ManagerArtistsPage from "./pagesManager/ManagerArtistsPage" 
-import ManArtistTransPage from "./pagesManager/ManArtistTransPage"
-import ManagerTransPage from "./pagesManager/ManagerTransPage"
-import TopArtistsRevenue from "./components/componentsManager/TopArtistsRevenue"
-import ManagerRequestsPage from "./pagesManager/ManagerRequestsPage"
-import AllSongsPageManager from "./pagesManager/AllSongsPageManager";
-import RoyaltiesPage from "./pagesAdmin/RoyaltiesPage";
-import ArtistRequestsPage from "./pagesArtist/ArtistRequestsPage";
-import UpdateProfilePage from "./components/common/UpdateProfilePage";
+import AddUsers from "./pagesAdmin/AddUsers/AddUsers";
+import AllSongsPageArtist from "./pagesArtist/AllSongsPageArtist/AllSongsPageArtists";
+import ContactForm from "./pagesAuth/ContactForm/ContactForm";
+import ContactRequestsPage from "./pagesAdmin/ContactRequestsPage/ContactRequestsPage";
+import MyManagerPage from "./pagesArtist/MyManagerPage/MyManagerPage";
+import OverviewPageManager from "./pagesManager/OverviewPageManager/OverviewPageManager";
+import ManagerArtistsPage from "./pagesManager/ManagerArtistsPage/ManagerArtistsPage"; 
+import ManArtistTransPage from "./pagesManager/ManArtistTransPage/ManArtistTransPage";
+import ManagerTransPage from "./pagesManager/ManagerTransPage/ManagerTransPage";
+import TopArtistsRevenue from "./components/componentsManager/TopArtistsRevenue/TopArtistsRevenue"
+import ManagerRequestsPage from "./pagesManager/ManagerRequestsPage/ManagerRequestsPage"
+import AllSongsPageManager from "./pagesManager/AllSongsPageManager/AllSongsPageManager";
+import RoyaltiesPage from "./pagesAdmin/RoyaltiesPage/RoyaltiesPage";
+import ArtistRequestsPage from "./pagesArtist/ArtistRequestsPage/ArtistRequestsPage";
+import UpdateProfilePage from "./components/common/UpdateProfile/UpdateProfilePage";
+import LandingPage from "./components/common/LandingPage/LandingPage";
+import Home from "./components/common/Home/Home";
+
+import AOS from "aos";
+import "aos/dist/aos.css";
+import { useEffect } from "react";
 
 
 function App() {
     const location = useLocation();
     const isAuthPage = ["/", "/login", "/changePassword", "/forgotPassword","/contactForm"].includes(location.pathname);
     const isAuthenticated = ApiService.isAuthenticated();
+    useEffect(() => {
+        AOS.init({ duration: 1000, once: true }); // Adjust duration if needed
+      }, []);
 
     return (
         <div className="flex h-screen bg-gray-900 text-gray-100 overflow-hidden">
@@ -48,7 +57,8 @@ function App() {
 
             <Routes>
                 {/* Auth Routes (No Sidebar) */}
-                <Route path="/" element={<LoginPage />} />
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/home" element={<Home />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/changePassword" element={<ChangePassword />} />
                 <Route path="/forgotPassword" element={<ForgotPassword />} />

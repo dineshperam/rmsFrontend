@@ -242,7 +242,7 @@ static async respondToPartnershipRequest(requestId, status) {
 
 
     static async getRoyalties() {
-    const response = await fetch(`${this.BASE_URL}/royalty/royaltyList`, {
+    const response = await axios.get(`${this.BASE_URL}/royalty/royaltyList`, {
         headers: this.getHeader(),
     });
     if (!response.ok) {
@@ -261,8 +261,48 @@ static async getPendingPartnershipRequest(artistId) {
     }
 }
 
+static async getTotalSongs(managerId) {
+    try {
+        const response = await axios.get(`${this.BASE_URL}/total-songs/${managerId}`, { headers: this.getHeader() });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching total songs:", error);
+        throw error;
+    }
+}
+
+static async getTotalStreams(managerId) {
+    try {
+        const response = await axios.get(`${this.BASE_URL}/total-streams/${managerId}`, { headers: this.getHeader() });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching total streams:", error);
+        throw error;
+    }
+}
+
+static async getManagerRevenue(managerId) {
+    try {
+        const response = await axios.get(`${this.BASE_URL}/manager-revenue/${managerId}`, { headers: this.getHeader() });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching manager revenue:", error);
+        throw error;
+    }
+}
+
+static async getTotalRevenue(managerId) {
+    try {
+        const response = await axios.get(`${this.BASE_URL}/total-revenue/${managerId}`, { headers: this.getHeader() });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching total revenue:", error);
+        throw error;
+    }
+}
+
 static async payRoyalty(royaltyId, adminId) {
-    const response = await fetch(`${this.BASE_URL}/royalty/payRoyalty/${royaltyId}/${adminId}`, {
+    const response = await axios.put(`${this.BASE_URL}/royalty/payRoyalty/${royaltyId}/${adminId}`, {
         method: "PUT",
         headers: this.getHeader(),
     });
