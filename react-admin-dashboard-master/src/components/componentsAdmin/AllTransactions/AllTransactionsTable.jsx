@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, ChevronLeft, ChevronRight, ChevronDown, Download } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, ChevronDown, Download, Loader2 } from "lucide-react";
 import ApiService from "../../../service/ApiService";
 import { sortTransactions, filterTransactions } from "../../../utils/SortFilter";
 import { paginate, getPageNumbers } from "../../../utils/Paginate";
@@ -13,6 +13,7 @@ const AllTransactions = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [exporting, setExporting] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [receiverSearch, setReceiverSearch] = useState("");
@@ -52,6 +53,7 @@ const AllTransactions = () => {
 
   // Export transactions as PDF
   const handleExportPDF = async () => {
+    setExporting(true);
     try {
       const response = await ApiService.exportTransPDF();
       const url = window.URL.createObjectURL(new Blob([response], { type: "application/pdf" }));
@@ -63,6 +65,8 @@ const AllTransactions = () => {
       document.body.removeChild(a);
     } catch (error) {
       console.error("Error exporting transactions PDF:", error);
+    }finally {
+      setExporting(false);
     }
   };
 
@@ -81,12 +85,13 @@ const AllTransactions = () => {
 
   return (
     <motion.div className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-      
+
       {/* Header Row: Title & Export Button */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-gray-100">All Transactions</h2>
-        <button onClick={handleExportPDF} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg flex items-center">
-          <Download className="mr-2" size={18} /> Export PDF
+        <button onClick={handleExportPDF} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg flex items-center" disabled={exporting}>
+        {exporting ? <Loader2 className="animate-spin mr-2" size={18} /> : <Download className="mr-2" size={18} />} 
+        {exporting ? "Exporting..." : "Export PDF"}
         </button>
       </div>
 
@@ -133,7 +138,7 @@ const AllTransactions = () => {
                 <td className="px-6 py-4 text-sm text-gray-300">{transaction.receiver}</td>
                 <td className="px-6 py-4 text-sm text-gray-300">{transaction.royaltyId}</td>
                 <td className="px-6 py-4 text-sm text-gray-300">{new Date(transaction.transactionDate).toLocaleString()}</td>
-                <td className="px-6 py-4 text-sm text-gray-300">${transaction.transactionAmount.toFixed(2)}</td>
+                <td className="px-6 py-4 text-sm text-gray-300">₹{transaction.transactionAmount.toFixed(2)}</td>
                 <td className="px-6 py-4 text-sm text-gray-300">{transaction.managerId}</td>
               </motion.tr>
             ))}

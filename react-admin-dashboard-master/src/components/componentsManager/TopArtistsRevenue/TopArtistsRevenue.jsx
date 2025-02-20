@@ -96,7 +96,7 @@ const TopArtistsRevenue = () => {
                     {artist[0]?.firstName} {artist[0]?.lastName}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    ${artist[1].toFixed(2)}
+                  ₹{artist[1].toFixed(2)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                     {artist[0]?.email}

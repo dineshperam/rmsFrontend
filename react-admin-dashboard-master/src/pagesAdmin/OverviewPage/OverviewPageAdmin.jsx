@@ -45,7 +45,7 @@ const OverviewPage = () => {
   const formatCurrency = (num) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(num);
   };
 

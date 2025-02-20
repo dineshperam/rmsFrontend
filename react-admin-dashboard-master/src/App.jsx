@@ -41,14 +41,14 @@ import { ToastContainer } from "react-toastify";
 
 function App() {
     const location = useLocation();
-    const isAuthPage = ["/", "/login", "/change-password", "/forgot-password","/contact-form"].includes(location.pathname);
+    const isAuthPage = ["/", "/login", "/change-password", "/forgot-password","/contact-form","/home"].includes(location.pathname);
     const isAuthenticated = ApiService.isAuthenticated();
     useEffect(() => {
         AOS.init({ duration: 1000, once: true }); // Adjust duration if needed
       }, []);
 
     return (
-        <div className="flex h-screen bg-gray-900 text-gray-100 overflow-hidden">
+        <div className="flex h-screen bg-gray-900 text-gray-100">
            {/* Background - Only show on non-auth pages */}
            {!isAuthPage && (
                 <div className="fixed inset-0 z-0">

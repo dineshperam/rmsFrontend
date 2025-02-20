@@ -41,10 +41,17 @@ const BarChartArtists = () => {
                             interval={0} 
                             tick={{ fontSize: 12 }} // Set default tick font size
                         />
-                        <YAxis 
-                            stroke="#9CA3AF" 
-                            tick={{ fontSize: 12 }} // Set default tick font size
-                        />
+                       <YAxis
+                            stroke='#9CA3AF'
+                            tickFormatter={(value) => {
+                                if (value >= 1_000_000) {
+                                return `${(value / 1_000_000).toFixed(1)}M`;
+                                } else if (value >= 1_000) {
+                                return `${(value / 1_000).toFixed(1)}K`;
+                                }
+                                return value;
+                            }}
+                            />
                         <Tooltip contentStyle={{ backgroundColor: "rgba(31, 41, 55, 0.8)", borderColor: "#4B5563" }} itemStyle={{ color: "#E5E7EB" }} />
                         <Legend />
                         <Bar dataKey="streams" fill="#82ca9d" barSize={50} />

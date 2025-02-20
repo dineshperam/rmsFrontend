@@ -38,6 +38,13 @@ const OverviewPageArtist = () => {
     return new Intl.NumberFormat('en-US').format(num);
   };
 
+  const formatCurrency = (num) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'INR'
+    }).format(num);
+  };
+
   return (
     <div className="flex-1 overflow-auto relative z-10">
       <Header title="Overview" />
@@ -63,7 +70,7 @@ const OverviewPageArtist = () => {
           <StatCard
             name="My Revenue"
             icon={CircleDollarSign}
-            value={formatNumber(stats.myRevenue)} // Correct key
+            value={formatCurrency(stats.myRevenue)} // Correct key
             color="#8B5CF6"
           />
           <StatCard

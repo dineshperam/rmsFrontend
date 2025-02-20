@@ -29,7 +29,7 @@ const Royalties = () => {
   };
  
   const handlePayment = async (royalty) => {
-    if (!window.confirm(`Process payment of $${royalty.royaltyAmount}?`)) return;
+    if (!window.confirm(`Process payment of ₹${royalty.royaltyAmount}?`)) return;
  
     setLoadingId(royalty.royaltyId);
  
@@ -41,7 +41,7 @@ const Royalties = () => {
         throw new Error(response.error);
       }
  
-      toast.success(`Royalty of $${royalty.royaltyAmount} paid successfully!`, {
+      toast.success(`Royalty of ₹${royalty.royaltyAmount} paid successfully!`, {
         position: "top-right",
         autoClose: 2000,
       });
@@ -121,7 +121,7 @@ const Royalties = () => {
                 <td className="px-6 py-4 text-sm text-gray-300">{r.songId}</td>
                 <td className="px-6 py-4 text-sm text-gray-300">{r.artistId}</td>
                 <td className="px-6 py-4 text-sm text-gray-300">{r.totalStreams}</td>
-                <td className="px-6 py-4 text-sm text-gray-300">${r.royaltyAmount.toFixed(2)}</td>
+                <td className="px-6 py-4 text-sm text-gray-300">₹{r.royaltyAmount.toFixed(2)}</td>
                 <td className="px-6 py-4 text-sm text-gray-300">{format(new Date(r.calculatedDate), "yyyy-MM-dd")}</td>
                 <td className={`px-6 py-4 text-sm font-bold ${r.status === "PAID" ? "text-green-400" : "text-red-400"}`}>
                   {r.status}

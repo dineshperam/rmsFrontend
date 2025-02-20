@@ -101,7 +101,7 @@ const ArtistsTrans = () => {
                 <td className="px-6 py-4 text-sm text-gray-300">{transaction.transactionId}</td>
                 <td className="px-6 py-4 text-sm text-gray-300">{transaction.sender}</td>
                 <td className="px-6 py-4 text-sm text-gray-300">{transaction.receiver}</td>
-                <td className="px-6 py-4 text-sm text-gray-300">${transaction.transactionAmount.toFixed(2)}</td>
+                <td className="px-6 py-4 text-sm text-gray-300">₹{transaction.transactionAmount.toFixed(2)}</td>
                 <td className="px-6 py-4 text-sm text-gray-300">{new Date(transaction.transactionDate).toLocaleString()}</td>
               </tr>
             ))}

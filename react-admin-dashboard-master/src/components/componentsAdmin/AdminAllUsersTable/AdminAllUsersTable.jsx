@@ -1,7 +1,25 @@
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import ApiService from "../../../service/ApiService";
+
+// Pagination utilities
+const paginate = (items, currentPage, pageSize) => {
+  const startIndex = (currentPage - 1) * pageSize;
+  return items.slice(startIndex, startIndex + pageSize);
+};
+
+const getPageNumbers = (totalItems, currentPage, pageSize) => {
+  const totalPages = Math.ceil(totalItems / pageSize);
+  let startPage = Math.max(1, currentPage - 2);
+  let endPage = Math.min(totalPages, startPage + 4);
+
+  if (endPage - startPage < 4) {
+    startPage = Math.max(1, endPage - 4);
+  }
+
+  return { startPage, endPage, totalPages };
+};
 
 const AdminAllUsersTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -9,6 +27,11 @@ const AdminAllUsersTable = () => {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(5);
+  const [paginatedUsers, setPaginatedUsers] = useState([]);
 
   useEffect(() => {
     const getUsers = async () => {
@@ -25,16 +48,26 @@ const AdminAllUsersTable = () => {
     getUsers();
   }, []);
 
+  useEffect(() => {
+    // Update paginated users whenever filtered users or current page changes
+    const paginated = paginate(filteredUsers, currentPage, pageSize);
+    setPaginatedUsers(paginated);
+  }, [filteredUsers, currentPage, pageSize]);
+
   const handleSearch = (e) => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
-    setFilteredUsers(
-      users.filter(
-        (user) =>
-          user.name.toLowerCase().includes(term) ||
-          user.email.toLowerCase().includes(term)
-      )
+    const filtered = users.filter(
+      (user) =>
+        user.name.toLowerCase().includes(term) ||
+        user.email.toLowerCase().includes(term)
     );
+    setFilteredUsers(filtered);
+    setCurrentPage(1); // Reset to first page on new search
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   const toggleUserStatus = async (userId) => {
@@ -57,6 +90,8 @@ const AdminAllUsersTable = () => {
 
   if (loading) return <div className="text-gray-300">Loading users...</div>;
   if (error) return <div className="text-red-500">Error: {error}</div>;
+
+  const { totalPages } = getPageNumbers(filteredUsers.length, currentPage, pageSize);
 
   return (
     <motion.div
@@ -91,7 +126,7 @@ const AdminAllUsersTable = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-700">
-            {filteredUsers.map((user) => (
+            {paginatedUsers.map((user) => (
               <motion.tr key={user.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
@@ -132,6 +167,32 @@ const AdminAllUsersTable = () => {
         </table>
       </div>
 
+      {/* Pagination Controls */}
+      <div className="flex justify-center mt-4">
+        <button 
+          className="mx-1 px-3 py-1 rounded-lg bg-gray-700 text-gray-300" 
+          onClick={() => handlePageChange(currentPage - 1)} 
+          disabled={currentPage === 1}
+        >
+          <ChevronLeft size={18} />
+        </button>
+        {[...Array(totalPages)].map((_, index) => (
+          <button 
+            key={index} 
+            className={`mx-1 px-3 py-1 rounded-lg ${currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-700 text-gray-300"}`} 
+            onClick={() => handlePageChange(index + 1)}
+          >
+            {index + 1}
+          </button>
+        ))}
+        <button 
+          className="mx-1 px-3 py-1 rounded-lg bg-gray-700 text-gray-300" 
+          onClick={() => handlePageChange(currentPage + 1)} 
+          disabled={currentPage === totalPages}
+        >
+          <ChevronRight size={18} />
+        </button>
+      </div>
     </motion.div>
   );
 };

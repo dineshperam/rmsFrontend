@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, Loader2, Download } from "lucide-react";
 import ApiService from "../../../service/ApiService";
 import { sortTransactions, filterByField } from "../../../utils/SortFilter";
 import { paginate, getPageNumbers } from "../../../utils/Paginate";
@@ -12,6 +12,7 @@ const ArtistsTransTable = () => {
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [exporting, setExporting] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [transactionSearch, setTransactionSearch] = useState("");
@@ -63,6 +64,7 @@ const ArtistsTransTable = () => {
 
   // ✅ Handle Export as PDF
   const handleExportPDF = async () => {
+    setExporting(true);
     try {
       const userId = ApiService.getUserId();
       if (!userId) {
@@ -81,6 +83,8 @@ const ArtistsTransTable = () => {
       document.body.removeChild(link);
     } catch (error) {
       console.error("Error exporting transactions PDF:", error);
+    }finally {
+      setExporting(false);
     }
   };
 
@@ -99,10 +103,11 @@ const ArtistsTransTable = () => {
         <h2 className="text-xl font-semibold text-gray-100">My Transactions</h2>
         <div className="flex gap-4">
           <button
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
-            onClick={handleExportPDF}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition flex items-center"
+            onClick={handleExportPDF} disabled={exporting}
           >
-            Export as PDF
+            {exporting ? <Loader2 className="animate-spin mr-2" size={18} /> : <Download className="mr-2" size={18} />} 
+            {exporting ? "Exporting..." : "Export PDF"}
           </button>
         </div>
       </div>
@@ -151,7 +156,7 @@ const ArtistsTransTable = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                   {new Date(transaction.transactionDate).toLocaleString()}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${transaction.transactionAmount.toFixed(2)}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">₹{transaction.transactionAmount.toFixed(2)}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{transaction.managerId}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{transaction.transactionType}</td>
               </motion.tr>

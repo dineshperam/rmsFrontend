@@ -18,6 +18,7 @@ const AddUser = () => {
 
     const [message, setMessage] = useState('');
     const [errors, setErrors] = useState({});
+    const [loadingSubmit, setLoadingSubmit] = useState(false);
 
     const validateField = (name, value) => {
         let error = "";
@@ -74,7 +75,7 @@ const AddUser = () => {
         e.preventDefault();
         const hasErrors = Object.values(errors).some((error) => error !== "");
         if (hasErrors) return;
-
+        setLoadingSubmit(true);
         const response = await ApiService.addUser(user);
         setMessage(response.message);
 
@@ -92,6 +93,7 @@ const AddUser = () => {
             });
             setErrors({});
         }
+        setLoadingSubmit(false);
     };
 
     const styles = {
@@ -155,7 +157,7 @@ const AddUser = () => {
                     <br />
                     
                     <button type="submit" style={styles.button} disabled={Object.values(errors).some(error => error !== "")}>
-                        Add User
+                    {loadingSubmit ? "Adding..." : "Add User"}
                     </button>
                     
                     

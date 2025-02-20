@@ -117,7 +117,7 @@ const ManagersTable = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-300">${manager.totalRoyalty.toLocaleString()}</div>
+                  <div className="text-sm text-gray-300">₹{manager.totalRoyalty.toLocaleString()}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
