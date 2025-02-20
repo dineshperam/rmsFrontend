@@ -4,7 +4,6 @@ import { Search, Download } from "lucide-react";
 import ApiService from "../../../service/ApiService";
 import { paginate, getPageNumbers } from "../../../utils/Paginate";
 import { sortTransactions, filterTransactions } from "../../../utils/SortFilter";
-import axios from "axios";
 
 const ArtistsTrans = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -18,30 +17,21 @@ const ArtistsTrans = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchTransactions = async () => {
-      const userId = ApiService.getManagerId();
-      if (!userId) {
-        console.error("User ID not found!");
-        return [];
-      }
-      try {
-        const response = await axios.get(`http://localhost:8080/trans/showTransByManId/${userId}`, {
-          headers: ApiService.getHeader(),
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch transactions");
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const data = await ApiService.fetchTransactionsArtists();
+            setTransactions(data);
+            setFilteredTransactions(data);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
         }
-        const data = await response.json();
-        setTransactions(data);
-        setFilteredTransactions(data);
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
-      }
     };
-    fetchTransactions();
-  }, []);
+
+    fetchData();
+}, []);
 
   useEffect(() => {
     let updatedTransactions = filterTransactions(transactions, searchTerm, receiverSearch, "");
@@ -54,29 +44,9 @@ const ArtistsTrans = () => {
   const handleSortChange = (e) => setSortField(e.target.value);
 
   const handleExportPDF = async () => {
-    try {
-      const userId = ApiService.getManagerId();
-      const response = await axios.get(`http://localhost:8080/trans/exportPDF/manager/${userId}`, {
-        headers: ApiService.getHeader(),
-        responseType: "blob",
-      });
+    await ApiService.exportTransactionsPDF();
+};
 
-      if (!response.ok) {
-        throw new Error("Failed to generate PDF");
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "transactions.pdf";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error("Error exporting PDF:", error);
-    }
-  };
 
   if (loading) return <div className="text-gray-300">Loading data...</div>;
   if (error) return <div className="text-red-500">Error: {error}</div>;

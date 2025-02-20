@@ -4,7 +4,6 @@ import { Search, ChevronLeft, ChevronRight, ChevronDown, Download } from "lucide
 import ApiService from "../../../service/ApiService";
 import { sortTransactions, filterTransactions } from "../../../utils/SortFilter";
 import { paginate, getPageNumbers } from "../../../utils/Paginate";
-import axios from "axios";
 
 const pageSize = 7; // Records per page
 
@@ -25,18 +24,12 @@ const AllTransactions = () => {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/trans/showTrans", {
-          headers: ApiService.getHeader(),
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch transactions");
-        }
-        const data = await response.json();
+        const data = await ApiService.fetchTransactions();
         setTransactions(data);
         setFilteredTransactions(data);
-        setLoading(false);
       } catch (err) {
         setError(err.message);
+      } finally {
         setLoading(false);
       }
     };

@@ -2,27 +2,22 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import ApiService from "../../../service/ApiService";
-import axios from "axios";
 
 const TopSongsChart = () => {
-    const artistId = ApiService.getUserId();
 	const [data, setData] = useState([]);
 
 	useEffect(() => {
-		const fetchData = async () => {
+		const getData = async () => {
 			try {
-				const response = await axios.get(`http://localhost:8080/insights/top-songs/${artistId}`);
-				const result = await response.json();
+				const result = await ApiService.fetchTopSongs();
 				setData(result);
 			} catch (error) {
-				console.error("Error fetching top songs:", error);
+				console.error("Failed to fetch top songs");
 			}
 		};
 
-		if (artistId) {
-			fetchData();
-		}
-	}, [artistId]);
+		getData();
+	}, []);
 
 	return (
 		<motion.div

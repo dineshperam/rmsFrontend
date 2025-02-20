@@ -1,5 +1,6 @@
 import axios from "axios";
 import CryptoJS from "crypto-js";
+import { toast } from "react-toastify";
 
 export default class ApiService {
     static BASE_URL = "http://localhost:8080";
@@ -358,28 +359,51 @@ static async exportPartnershipPDF(artistId) {
 }
 
 static async requestOtp(username) {
-    try {
-        const response = await axios.post(`${this.BASE_URL}/user/forgotPassword`, { username });
-        return response.data;
-    } catch (error) {
-        console.error("Error sending OTP:", error.response ? error.response.data : error.message);
-        throw error;
+    if (!username.trim()) {
+      toast.error("Please enter your username.");
+      return;
     }
-}
 
-static async resetPassword(username, otp, newPassword) {
     try {
-        const response = await axios.put(`${this.BASE_URL}/user/updatePassword`, {
-            username,
-            otp,
-            newPassword
-        });
-        return response.data;
+      await axios.post(`${this.BASE_URL}/user/forgotPassword`, { username });
+      toast.success("OTP sent to your email!");
+      return { success: true };
     } catch (error) {
-        console.error("Error resetting password:", error.response ? error.response.data : error.message);
-        throw error;
+      console.error("Error sending OTP:", error.response ? error.response.data : error.message);
+      toast.error("Failed to send OTP. Please try again.");
+      return { success: false };
     }
-}
+  }
+
+static async resetPassword(username, otp, newPassword, confirmPassword) {
+    if (!otp.trim()) {
+      toast.error("Please enter the OTP.");
+      return;
+    }
+    if (!newPassword.trim()) {
+      toast.error("Please enter a new password.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match!");
+      return;
+    }
+
+    try {
+      const response = await axios.put(`${this.BASE_URL}/user/updatePassword`, {
+        username,
+        otp,
+        newPassword,
+      });
+
+      toast.success(response.data || "Password successfully changed!");
+      return { success: true };
+    } catch (error) {
+      console.error("Error resetting password:", error.response ? error.response.data : error.message);
+      toast.error("Failed to reset password. " + (error.response ? error.response.data : ""));
+      return { success: false };
+    }
+  }
 
 
 static async exportTransPDF() {
@@ -554,6 +578,458 @@ static async exportTransPDF() {
             console.error("Error fetching top 5 artists:", error);
             throw error;
         }
+    }   
+
+    static async addUser(user) {
+        try {
+            await axios.post(`${this.BASE_URL}/auth/register`, user);
+            return { success: true, message: "User added successfully" };
+        } catch (error) {
+            console.error("Error adding user:", error);
+            return { success: false, message: "Failed to add user. Please try again." };
+        }
+    }
+
+    static async fetchUsers() {
+        try {
+          const response = await axios.get(`${this.BASE_URL}/insights/admin-getall-users`, {
+            headers: this.getHeader(),
+          });
+          return response.data;
+        } catch (error) {
+          console.error("Error fetching users:", error);
+          throw new Error("Failed to fetch users");
+        }
+      }
+    
+      static async toggleUserStatus(userId) {
+        try {
+          await axios.put(`${this.BASE_URL}/user/updateStatus/${userId}`, {}, { headers: this.getHeader() });
+          return { success: true };
+        } catch (error) {
+          console.error("Error updating user status:", error);
+          throw new Error("Failed to update user status");
+        }
+      }
+
+      static async fetchSongs() {
+        try {
+          const response = await axios.get(`${this.BASE_URL}/artist/songsList`, {
+            headers: this.getHeader(),
+          });
+          return response.data;
+        } catch (error) {
+          console.error("Error fetching songs:", error);
+          throw new Error("Failed to fetch songs");
+        }
+      }
+
+      static async fetchTransactions() {
+        try {
+          const response = await axios.get(`${this.BASE_URL}/trans/showTrans`, {
+            headers: this.getHeader(),
+          });
+          return response.data;
+        } catch (error) {
+          console.error("Error fetching transactions:", error);
+          throw new Error("Failed to fetch transactions");
+        }
+      }
+    
+      static async fetchTop5Artists() {
+        try {
+          const response = await axios.get(`${this.BASE_URL}/insights/top5artists-details`, {
+            headers: this.getHeader(),
+          });
+          return response.data;
+        } catch (error) {
+          console.error("Error fetching top 5 artists:", error);
+          throw new Error("Failed to fetch top 5 artists");
+        }
+      }
+
+      static async fetchTop5Managers(selectedTimeRange) {
+        try {
+            const response = await axios.get(`${this.BASE_URL}/insights/top5-managers-monthly?year=${selectedTimeRange}`, {
+                headers: this.getHeader(),
+            });
+    
+            const rawData = response.data;
+    
+            const transformedData = rawData.map(entry => {
+                const newEntry = { month: entry.month };
+                const managers = new Set();
+    
+                for (let i = 1; i <= 5; i++) { // Assuming top 5 managers at max
+                    const nameKey = `manager${i}_name`;
+                    const revenueKey = `manager${i}`;
+                    
+                    if (entry[nameKey] && entry[revenueKey] !== undefined) {
+                        newEntry[entry[nameKey]] = entry[revenueKey];
+                        managers.add(entry[nameKey]);
+                    }
+                }
+    
+                return { data: newEntry, managers: Array.from(managers) };
+            });
+    
+            return {
+                revenueData: transformedData.map(item => item.data),
+                managerKeys: Array.from(new Set(transformedData.flatMap(item => item.managers))),
+            };
+    
+        } catch (error) {
+            console.error("Error fetching top 5 managers:", error);
+            throw new Error("Failed to fetch top 5 managers");
+        }
+    }
+
+    static async fetchTop5ManagersTable(year) {
+        try {
+          const response = await axios.get(
+            `${this.BASE_URL}/insights/top5-managers-detailsTab?year=${year}`,
+            { headers: this.getHeader() }
+          );
+          return response.data;
+        } catch (error) {
+          console.error("Error fetching top 5 managers:", error);
+          throw new Error("Failed to fetch top 5 managers");
+        }
+      }
+
+      static async fetchContactRequests() {
+        try {
+          const response = await axios.get(`${this.BASE_URL}/contact/showContacts`);
+          return response.data.filter((request) => request.status === "Pending");
+        } catch (error) {
+          console.error("Error fetching contact requests:", error);
+          throw new Error("Failed to fetch contact requests");
+        }
+      }
+
+      static async handleContactAction(contactId, action) {
+        try {
+          const adminId = this.getUserId();
+          const url =
+            action === "accept"
+              ? `${this.BASE_URL}/contact/accept/${contactId}/${adminId}`
+              : `${this.BASE_URL}/contact/reject/${contactId}`;
+    
+          const response = await axios.put(url);
+    
+          if (response.status === 200) {
+            if (response.data === "Email already exists. Cannot create a new user.") {
+              alert(response.data); // Show error if email exists
+            } else {
+              alert(`Request ${action}ed.`);
+              return true;
+            }
+          }
+        } catch (error) {
+          console.error(`Error ${action}ing request:`, error);
+          alert(`Failed to ${action} request.`);
+          return false;
+        }
+      }
+
+      static async addSong(song, artistId) {
+        try {
+          const newSong = { ...song, artistId: artistId };
+          await axios.post(`${this.BASE_URL}/artist/addSong`, newSong, {
+            headers: this.getHeader(),
+          });
+          return { success: true, message: "Song added successfully" };
+        } catch (error) {
+          console.error("Error adding song:", error);
+          return { success: false, message: "Failed to add song. Please try again." };
+        }
+      }
+
+      static async fetchSongsArtists() {
+        try {
+          const response = await axios.get(`${this.BASE_URL}/artist/songsList`, {
+            headers: this.getHeader(),
+          });
+          return response.data;
+        } catch (error) {
+          console.error("Error fetching songs:", error);
+          throw new Error("Failed to fetch songs");
+        }
+      }
+
+      static async fetchArtistSongs() {
+        try {
+            const artistId = this.getUserId();
+            const response = await axios.get(`${this.BASE_URL}/insights/top-songs-artist-table/${artistId}`, {
+                headers: this.getHeader(),
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching artist songs:", error);
+            throw new Error("Failed to fetch songs");
+        }
     }    
+
+    static async fetchTransactionsById() {
+        try {
+            const userId = this.getUserId();
+            if (!userId) {
+                console.error("User ID not found!");
+                return [];
+            }
+            const response = await axios.get(`${this.BASE_URL}/trans/showTransById/${userId}`, {
+                headers: this.getHeader(),
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching transactions:", error);
+            throw new Error("Failed to fetch transactions");
+        }
+    }
+
+    static async fetchGenreData(artistId) {
+        try {
+            if (!artistId) {
+                console.error("Artist ID not provided!");
+                return [];
+            }
+            const response = await axios.get(`${this.BASE_URL}/insights/genre-count/${artistId}`);
+            return response.data; // No need to use response.json() with axios
+        } catch (error) {
+            console.error("Error fetching genre data:", error);
+            throw new Error("Failed to fetch genre data");
+        }
+    }
+
+    static async fetchArtistSongsTop() {
+        try {
+            const artistId = this.getUserId();
+            if (!artistId) {
+                console.error("Artist ID not provided!");
+                return [];
+            }
+            const response = await axios.get(`${this.BASE_URL}/insights/top-songs-artist-table/${artistId}`, {
+                headers: this.getHeader(),
+            });
+            return response.data; // No need to use response.json() with axios
+        } catch (error) {
+            console.error("Error fetching artist songs:", error);
+            throw new Error("Failed to fetch artist songs");
+        }
+    }
+    
+    static async fetchTopSongs() {
+		try {
+			const artistId = this.getUserId();
+			if (!artistId) {
+				console.error("Artist ID not provided!");
+				return [];
+			}
+
+			const response = await axios.get(`${this.BASE_URL}/insights/top-songs/${artistId}`, {
+				headers: this.getHeader(),
+			});
+			return response.data;
+		} catch (error) {
+			console.error("Error fetching top songs:", error);
+			throw new Error("Failed to fetch top songs");
+		}
+	}
+
+    static async fetchTransactionsArtists() {
+        try {
+            const userId = this.getManagerId();
+            if (!userId) {
+                console.error("User ID not found!");
+                return [];
+            }
+    
+            const response = await axios.get(`${this.BASE_URL}/trans/showTransByManId/${userId}`, {
+                headers: this.getHeader(),
+            });
+    
+            return response.data; // Return fetched data
+        } catch (error) {
+            console.error("Error fetching transactions:", error);
+            throw new Error("Failed to fetch transactions");
+        }
+    }
+
+    static async exportTransactionsPDF() {
+        try {
+            const userId = this.getManagerId();
+            if (!userId) {
+                console.error("User ID not found!");
+                return;
+            }
+    
+            const response = await axios.get(`${this.BASE_URL}/trans/exportPDF/manager/${userId}`, {
+                headers: this.getHeader(),
+                responseType: "blob",
+            });
+    
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "transactions.pdf";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error("Error exporting PDF:", error);
+        }
+    }
+    
+    static async fetchArtistsWithStreams(manId) {
+        try {
+            console.log("Fetching artists with headers:", this.getHeader());
+    
+            const artistsResponse = await axios.get(`${this.BASE_URL}/user/getArtistUnderManager/${manId}`, {
+                headers: this.getHeader(),
+            });
+    
+            const artistsData = artistsResponse.data;
+            if (!Array.isArray(artistsData)) throw new Error("Invalid artists data format");
+    
+            // Filter only artists
+            const artists = artistsData.filter(user => user.role === "Artist");
+    
+            // Fetch total streams per artist
+            const streamsResponse = await axios.get(`${this.BASE_URL}/insights/total-streams-per-artist`, {
+                headers: this.getHeader(),
+            });
+    
+            const streamsData = streamsResponse.data;
+    
+            // Map artist data with streams
+            return artists.map(artist => ({
+                artist: `${artist.firstName} ${artist.lastName}`,
+                streams: streamsData[artist.userid] || 0, // Default to 0 if no streams found
+            }));
+        } catch (error) {
+            console.error("Error fetching artists with streams:", error);
+            throw new Error("Failed to fetch artists with streams");
+        }
+    }
+
+    static async fetchArtistsUnderManager(managerId) {
+        try {
+            if (!managerId) {
+                console.error("Manager ID not provided!");
+                return [];
+            }
+            const response = await axios.get(
+                `${this.BASE_URL}/user/getArtistUnderManager/${managerId}`,
+                {
+                    headers: this.getHeader(),
+                }
+            );
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching artists:", error);
+            throw new Error("Failed to fetch artists");
+        }
+    }  
+
+    static async exportPartnershipPDFMan(artistId) {
+        try {
+            const response = await axios.get(
+                `${this.BASE_URL}/partnerships/export-pdf-partner/${artistId}`,
+                {
+                    headers: this.getHeader(),
+                    responseType: "blob",
+                }
+            );
+    
+            const blob = new Blob([response.data], { type: "application/pdf" });
+            const link = document.createElement("a");
+            link.href = window.URL.createObjectURL(blob);
+            link.download = `partnership_contract_${artistId}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error("Error exporting contract PDF:", error);
+        }
+    }
+    
+    static async fetchUserStats() {
+        try {
+            const activeUsersResponse = await axios.get(
+                `${this.BASE_URL}/insights/active-users-count`,
+                { headers: this.getHeader() }
+            );
+            const totalUsersResponse = await axios.get(
+                `${this.BASE_URL}/insights/admin-allusers-count`,
+                { headers: this.getHeader() }
+            );
+
+            return {
+                activeUsers: activeUsersResponse.data,
+                totalUsers: totalUsersResponse.data,
+            };
+        } catch (error) {
+            console.error("Error fetching user stats:", error);
+            throw new Error("Failed to fetch user stats");
+        }
+    }
+
+    static async fetchStats(userId) {
+        try {
+            const [mySongs, myRevenue, myStreams] = await Promise.all([
+                axios.get(`${this.BASE_URL}/insights/mysongs/${userId}`, { headers: this.getHeader() }),
+                axios.get(`${this.BASE_URL}/insights/totalRevenuebyId/${userId}`, { headers: this.getHeader() }),
+                axios.get(`${this.BASE_URL}/insights/totalStreamsById/${userId}`, { headers: this.getHeader() })
+            ]);
+    
+            return {
+                mySongs: mySongs.data,
+                myRevenue: myRevenue.data,
+                myStreams: myStreams.data,
+            };
+        } catch (error) {
+            console.error("Error fetching stats:", error);
+            throw new Error("Failed to fetch statistics");
+        }
+    }    
+    
+    static async updatePassword(username, otp, newPassword) {
+        try {
+          const response = await axios.put(`${this.BASE_URL}/updatePassword`, {
+            username,
+            otp,
+            newPassword,
+          });
+    
+          if (response.status === 200) {
+            toast.success("Password changed successfully!");
+            return true;
+          }
+        } catch (error) {
+          console.error("Error updating password:", error);
+          toast.error("Failed to update password. " + (error.response ? error.response.data : ""));
+          return false;
+        }
+      }
+
+      static async submitContactForm(formData) {
+        try {
+            const response = await axios.post(`${this.BASE_URL}/contact/submit`, formData, {
+                headers: { "Content-Type": "application/json" },
+            });
+
+            if (response.status === 200) {
+                toast.success("Your query has been submitted successfully.");
+                return true;
+            } else {
+                toast.error("Error submitting the form. Please try again.");
+                return false;
+            }
+        } catch (error) {
+            console.error("Error connecting to the server:", error);
+            toast.error("Error connecting to the server.");
+            return false;
+        }
+    }
     
 }

@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import ApiService from "../../../service/ApiService";
-import axios from "axios";
 
 const ChartManagers = () => {
     const [selectedTimeRange, setSelectedTimeRange] = useState("2024");
@@ -12,39 +11,17 @@ const ChartManagers = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get(`http://localhost:8080/insights/top5-managers-monthly?year=${selectedTimeRange}`,{
-                    headers: ApiService.getHeader(),
-                });
-                const rawData = await response.json();
-
-                const transformedData = rawData.map(entry => {
-                    const newEntry = { month: entry.month };
-                    const managers = new Set();
-
-                    for (let i = 1; i <= 5; i++) { // Assuming top 5 managers at max
-                        const nameKey = `manager${i}_name`;
-                        const revenueKey = `manager${i}`;
-                        
-                        if (entry[nameKey] && entry[revenueKey] !== undefined) {
-                            newEntry[entry[nameKey]] = entry[revenueKey];
-                            managers.add(entry[nameKey]);
-                        }
-                    }
-
-                    return { data: newEntry, managers: Array.from(managers) };
-                });
-
-                setRevenueData(transformedData.map(item => item.data));
-                
-                const uniqueManagers = new Set(transformedData.flatMap(item => item.managers));
-                setManagerKeys(Array.from(uniqueManagers));
+                const { revenueData, managerKeys } = await ApiService.fetchTop5Managers(selectedTimeRange);
+                setRevenueData(revenueData);
+                setManagerKeys(managerKeys);
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
         };
-
+    
         fetchData();
     }, [selectedTimeRange]);
+    
 
     return (
         <motion.div

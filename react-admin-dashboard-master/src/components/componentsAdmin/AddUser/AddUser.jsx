@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import ApiService from '../../../service/ApiService';
 // import Header from '../common/Header';
 
 const AddUser = () => {
@@ -13,7 +13,7 @@ const AddUser = () => {
         role: '',
         password: '',
         passwordHash: '',
-        managerId: 6
+        managerId: 0
     });
 
     const [message, setMessage] = useState('');
@@ -75,9 +75,10 @@ const AddUser = () => {
         const hasErrors = Object.values(errors).some((error) => error !== "");
         if (hasErrors) return;
 
-        try {
-            await axios.post("http://localhost:8080/auth/register", user);
-            setMessage("User added successfully");
+        const response = await ApiService.addUser(user);
+        setMessage(response.message);
+
+        if (response.success) {
             setUser({
                 firstName: '',
                 lastName: '',
@@ -90,9 +91,6 @@ const AddUser = () => {
                 passwordHash: '',
             });
             setErrors({});
-        } catch (error) {
-            console.error("Error adding user:", error);
-            setMessage("Failed to add user. Please try again.");
         }
     };
 

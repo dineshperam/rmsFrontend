@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { motion } from "framer-motion";
 import ApiService from "../../../service/ApiService";
-import axios from "axios";
 
 const AdminAllUsersTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -12,24 +11,18 @@ const AdminAllUsersTable = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const getUsers = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/insights/admin-getall-users", {
-          headers: ApiService.getHeader(),
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch users");
-        }
-        const data = await response.json();
+        const data = await ApiService.fetchUsers();
         setUsers(data);
         setFilteredUsers(data);
-        setLoading(false);
       } catch (err) {
         setError(err.message);
+      } finally {
         setLoading(false);
       }
     };
-    fetchUsers();
+    getUsers();
   }, []);
 
   const handleSearch = (e) => {
@@ -46,14 +39,7 @@ const AdminAllUsersTable = () => {
 
   const toggleUserStatus = async (userId) => {
     try {
-      const response = await axios.put(`http://localhost:8080/user/updateStatus/${userId}`, {
-        method: "PUT",
-        headers: ApiService.getHeader(),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to update user status");
-      }
-
+      await ApiService.toggleUserStatus(userId);
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.id === userId ? { ...user, status: !user.status } : user
@@ -145,7 +131,7 @@ const AdminAllUsersTable = () => {
           </tbody>
         </table>
       </div>
-      
+
     </motion.div>
   );
 };

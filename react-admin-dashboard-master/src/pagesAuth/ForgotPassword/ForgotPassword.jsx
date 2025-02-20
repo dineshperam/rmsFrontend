@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Mail, Key, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { toast } from "react-toastify";
 import { motion } from "framer-motion";
+import ApiService from "../../service/ApiService";
 
 const ForgotPassword = () => {
   const [username, setUsername] = useState("");
@@ -16,52 +15,24 @@ const ForgotPassword = () => {
   const navigate = useNavigate();
 
   const requestOtp = async () => {
-    if (!username.trim()) {
-      toast.error("Please enter your username.");
-      return;
-    }
     setLoading(true);
     setOtpButtonDisabled(true);
-
-    try {
-      await axios.post("http://localhost:8080/user/forgotPassword", { username });
+    const result = await ApiService.requestOtp(username);
+    if (result.success) {
       setOtpSent(true);
-      toast.success("OTP sent to your email!");
-      // Removed alert, using only toast notification
-    } catch (error) {
-      console.error("Error sending OTP:", error.response ? error.response.data : error.message);
-      toast.error("Failed to send OTP. Please try again.");
+    } else {
       setOtpButtonDisabled(false);
     }
     setLoading(false);
   };
 
   const resetPassword = async () => {
-    if (!otp.trim()) {
-      toast.error("Please enter the OTP.");
-      return;
-    }
-    if (!newPassword.trim()) {
-      toast.error("Please enter a new password.");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      toast.error("Passwords do not match!");
-      return;
-    }
-    try {
-      const response = await axios.put("http://localhost:8080/user/updatePassword", {
-        username,
-        otp,
-        newPassword
-      });
-      toast.success(response.data || "Password successfully changed!");
-      // Removed alert, using only toast notification
+    setLoading(true);
+    const result = await ApiService.resetPassword(username, otp, newPassword, confirmPassword);
+    if (result.success) {
       setTimeout(() => navigate("/login"), 2000);
-    } catch (error) {
-      console.error("Error resetting password:", error.response ? error.response.data : error.message);
-      toast.error("Failed to reset password. " + (error.response ? error.response.data : ""));
     }
+    setLoading(false);
   };
 
   const handleSubmit = (e) => {

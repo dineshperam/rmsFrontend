@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
-import axios from "axios";
 import ApiService from "../../../service/ApiService";
 
 const ArtistsTable = () => {
@@ -10,12 +9,17 @@ const ArtistsTable = () => {
     const [filteredArtists, setFilteredArtists] = useState([]);
 
     useEffect(() => {
-        axios.get("http://localhost:8080/insights/top5artists-details", {
-            headers: ApiService.getHeader(),
-        })
-        .then(response => setArtists(response.data))
-        .catch(error => console.error("Error fetching artists:", error));
-    }, []);
+        const fetchArtists = async () => {
+          try {
+            const data = await ApiService.fetchTop5Artists();
+            setArtists(data);
+          } catch (error) {
+            console.error(error);
+          }
+        };
+    
+        fetchArtists();
+      }, []);
 
     useEffect(() => {
         setFilteredArtists(

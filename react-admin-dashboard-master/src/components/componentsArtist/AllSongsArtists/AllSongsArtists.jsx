@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
 import ApiService from "../../../service/ApiService";
-import axios from "axios";
 
 const AllSongsArtists = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -12,24 +11,19 @@ const AllSongsArtists = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchSongs = async () => {
+    const getSongs = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/artist/songsList", {
-          headers: ApiService.getHeader(),
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch songs");
-        }
-        const data = await response.json();
+        const data = await ApiService.fetchSongs();
         setSongs(data);
         setFilteredSongs(data);
-        setLoading(false);
       } catch (err) {
         setError(err.message);
+      } finally {
         setLoading(false);
       }
     };
-    fetchSongs();
+
+    getSongs();
   }, []);
 
   const handleSearch = (e) => {

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search, Loader2 } from "lucide-react";
-import axios from "axios";
 import ApiService from "../../../service/ApiService";
 
 const ContactRequests = () => {
@@ -11,42 +10,27 @@ const ContactRequests = () => {
   const [loadingAction, setLoadingAction] = useState({ id: null, type: null });
   
   useEffect(() => {
-    const fetchContactRequests = async () => {
+    const fetchRequests = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/api/contact/showContacts");
-        const pendingRequests = response.data.filter(request => request.status === "Pending");
+        const pendingRequests = await ApiService.fetchContactRequests();
         setRequests(pendingRequests);
         setFilteredRequests(pendingRequests);
       } catch (error) {
-        console.error("Error fetching contact requests:", error);
+        console.error(error);
       }
     };
-    fetchContactRequests();
+    fetchRequests();
   }, []);
 
   const handleAction = async (contactId, action) => {
     setLoadingAction({ id: contactId, type: action });
-    try {
-      const adminId = ApiService.getUserId();
-      const url = action === "accept" 
-        ? `http://localhost:8080/api/contact/accept/${contactId}/${adminId}`
-        : `http://localhost:8080/api/contact/reject/${contactId}`;
-      
-      const response = await axios.put(url);
-  
-      if (response.status === 200) {
-        if (response.data === "Email already exists. Cannot create a new user.") {
-          alert(response.data); // Show error if email exists
-        } else {
-          alert(`Request ${action}ed.`);
-          setRequests(requests.filter(request => request.id !== contactId));
-          setFilteredRequests(filteredRequests.filter(request => request.id !== contactId));
-        }
-      }
-    } catch (error) {
-      console.error(`Error ${action}ing request:`, error);
-      alert(`Failed to ${action} request.`);
+    const success = await ApiService.handleContactAction(contactId, action);
+
+    if (success) {
+      setRequests((prevRequests) => prevRequests.filter((request) => request.id !== contactId));
+      setFilteredRequests((prevFiltered) => prevFiltered.filter((request) => request.id !== contactId));
     }
+    
     setLoadingAction({ id: null, type: null });
   };
   

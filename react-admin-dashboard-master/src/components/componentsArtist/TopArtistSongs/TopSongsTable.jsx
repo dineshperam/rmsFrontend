@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
 import ApiService from "../../../service/ApiService";
-import axios from "axios";
 
 const TopArtistSongs = () => {
     const [songs, setSongs] = useState([]);
@@ -12,13 +11,9 @@ const TopArtistSongs = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchArtistSongs = async () => {
+        const fetchSongs = async () => {
             try {
-                const artistId = ApiService.getUserId();
-                const response = await axios.get(`http://localhost:8080/insights/top-songs-artist-table/${artistId}`, {
-                          headers: ApiService.getHeader(),
-                    });
-                const artistSongs = await response.json();
+                const artistSongs = await ApiService.fetchArtistSongsTop();
                 setSongs(artistSongs);
                 setFilteredSongs(artistSongs);
             } catch (err) {
@@ -27,8 +22,8 @@ const TopArtistSongs = () => {
                 setLoading(false);
             }
         };
-
-        fetchArtistSongs();
+    
+        fetchSongs();
     }, []);
 
     const handleSearch = (e) => {

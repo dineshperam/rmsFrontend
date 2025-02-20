@@ -1,5 +1,4 @@
 import { useState } from "react";
-import axios from "axios";
 import Header from "../../common/Header/Header";
 import ApiService from "../../../service/ApiService";
 
@@ -54,17 +53,12 @@ const AddSong = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
-    try {
-      const newSong = { ...song, artistId: artistId };
+    const response = await ApiService.addSong(song, artistId);
+    setMessage(response.message);
 
-      await axios.post("http://localhost:8080/artist/addSong", newSong,{
-        headers: ApiService.getHeader(),
-      });
-      setMessage("Song added successfully");
+    if (response.success) {
       setSong({
         title: "",
         releaseDate: "",
@@ -72,11 +66,9 @@ const AddSong = () => {
         genre: "",
       });
       setErrors({});
-    } catch (error) {
-      console.error("Error adding song:", error);
-      setMessage("Failed to add song. Please try again.");
     }
   };
+
   return (
     <div className="flex-1 overflow-auto relative z-10 min-h-screen">
       <Header title="Add Song" />

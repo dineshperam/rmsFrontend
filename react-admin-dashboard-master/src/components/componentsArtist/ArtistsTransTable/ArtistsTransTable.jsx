@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import ApiService from "../../../service/ApiService";
 import { sortTransactions, filterByField } from "../../../utils/SortFilter";
 import { paginate, getPageNumbers } from "../../../utils/Paginate";
-import axios from "axios";
 
 const pageSize = 10; // Records per page
 
@@ -22,29 +21,18 @@ const ArtistsTransTable = () => {
   const [sortOrder, setSortOrder] = useState("asc");
 
   useEffect(() => {
-    const fetchTransactions = async () => {
-      const userId = ApiService.getUserId();
-      if (!userId) {
-        console.error("User ID not found!");
-        return;
-      }
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/trans/showTransById/${userId}`, {
-          headers: ApiService.getHeader(),
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch transactions");
-        }
-        const data = await response.json();
-        setTransactions(data);
-        setFilteredTransactions(data);
-        setLoading(false);
+          const data = await ApiService.fetchTransactionsById();
+          setTransactions(data);
+          setFilteredTransactions(data);
       } catch (err) {
-        setError(err.message);
-        setLoading(false);
+          setError(err.message);
+      } finally {
+          setLoading(false);
       }
-    };
-    fetchTransactions();
+  };
+  fetchData();
   }, []);
 
   // ✅ Filtering logic

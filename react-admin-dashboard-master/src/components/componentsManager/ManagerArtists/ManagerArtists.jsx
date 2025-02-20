@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search, Download } from "lucide-react";
-import axios from "axios";
 import ApiService from "../../../service/ApiService";
 
 const ManagerArtists = () => {
@@ -15,23 +14,18 @@ const ManagerArtists = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:8080/user/getArtistUnderManager/${managerId}`,
-          {
-            headers: ApiService.getHeader(),
-          }
-        );
-        setArtists(response.data);
-        setFilteredArtists(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError("Failed to fetch artists");
-        setLoading(false);
-      }
+        try {
+            const data = await ApiService.fetchArtistsUnderManager(managerId);
+            setArtists(data);
+            setFilteredArtists(data);
+            setLoading(false);
+        } catch (err) {
+            setError("Failed to fetch artists");
+            setLoading(false);
+        }
     };
     fetchData();
-  }, [managerId]);
+}, [managerId]);
 
   const handleSearch = (e) => {
     const term = e.target.value.toLowerCase();
@@ -47,26 +41,8 @@ const ManagerArtists = () => {
   };
 
   const exportPartnershipPDF = async (artistId) => {
-    try {
-      const response = await axios.get(
-        `${ApiService.BASE_URL}/partnerships/export-pdf-partner/${artistId}`,
-        {
-          headers: ApiService.getHeader(),
-          responseType: "blob",
-        }
-      );
-
-      const blob = new Blob([response.data], { type: "application/pdf" });
-      const link = document.createElement("a");
-      link.href = window.URL.createObjectURL(blob);
-      link.download = `partnership_contract_${artistId}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error("Error exporting contract PDF:", error);
-    }
-  };
+    await ApiService.exportPartnershipPDFMan(artistId);
+};
 
   if (loading) return <div className="text-gray-300">Loading artists...</div>;
   if (error) return <div className="text-red-500">Error: {error}</div>;

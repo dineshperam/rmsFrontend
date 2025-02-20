@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import ApiService from "../../../service/ApiService";
-import axios from "axios";
 
 const BarChartArtists = () => {
     const [chartData, setChartData] = useState([]);
@@ -11,46 +10,16 @@ const BarChartArtists = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                console.log("Fetching artists with headers:", ApiService.getHeader());
-
-                const artistsResponse = await axios.get(`http://localhost:8080/user/getArtistUnderManager/${manId}`, {
-                    headers: ApiService.getHeader(),
-                });
-                // alert(JSON.stringify(artistsResponse))
-
-                if (!artistsResponse.ok) {
-                    throw new Error(`Artists API Error: ${artistsResponse.status}`);
-                }
-
-                const artistsData = await artistsResponse.json();
-                if (!Array.isArray(artistsData)) throw new Error("Invalid artists data format");
-
-                // **Filter only artists**
-                const artists = artistsData.filter(user => user.role === "Artist");
-
-                // Fetch total streams per artist
-                const streamsResponse = await axios.get("http://localhost:8080/insights/total-streams-per-artist", {
-                    headers: ApiService.getHeader(),
-                });
-
-                if (!streamsResponse.ok) throw new Error(`Streams API Error: ${streamsResponse.status}`);
-
-                const streamsData = await streamsResponse.json();
-
-                // Map artist data with streams
-                const formattedData = artists.map(artist => ({
-                    artist: `${artist.firstName} ${artist.lastName}`, // Ensure correct naming
-                    streams: streamsData[artist.userid] || 0, // Default to 0 if no streams found
-                }));
-
-                setChartData(formattedData);
+                const data = await ApiService.fetchArtistsWithStreams(manId);
+                setChartData(data);
             } catch (error) {
-                console.error("Error fetching data:", error);
+                console.error("Error fetching chart data:", error);
             }
         };
-
+    
         fetchData();
     }, [manId]);
+    
 
     return (
         <motion.div

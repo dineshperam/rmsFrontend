@@ -1,5 +1,5 @@
-import axios from "axios";
 import { useState } from "react";
+import ApiService from "../../service/ApiService";
 
 const ContactForm = () => {
     const [formData, setFormData] = useState({
@@ -63,22 +63,13 @@ const ContactForm = () => {
         e.preventDefault();
         if (!validateForm()) return;
 
-        try {
-            const response = await axios.post("http://localhost:8080/api/contact/submit", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
-            });
-
-            if (response.ok) {
-                setMessage("Your query has been submitted successfully.");
-                setFormData({ firstname: "", lastname: "", email: "", mobileno: "", query: "", role: "Artist" });
-                setErrors({});
-            } else {
-                setMessage("Error submitting the form. Please try again.");
-            }
-        } catch (error) {
-            setMessage("Error connecting to the server.");
+        const success = await ApiService.submitContactForm(formData);
+        if (success) {
+            setMessage("Your query has been submitted successfully.");
+            setFormData({ firstname: "", lastname: "", email: "", mobileno: "", query: "", role: "Artist" });
+            setErrors({});
+        } else {
+            setMessage("Error submitting the form. Please try again.");
         }
     };
 

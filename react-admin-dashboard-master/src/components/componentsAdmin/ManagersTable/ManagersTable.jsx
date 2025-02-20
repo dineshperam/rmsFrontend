@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
 import ApiService from "../../../service/ApiService";
-import axios from "axios";
 
 const ManagersTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -11,16 +10,19 @@ const ManagersTable = () => {
   const [selectedYear, setSelectedYear] = useState("2024");
 
   useEffect(() => {
-    axios.get(`http://localhost:8080/insights/top5-managers-detailsTab?year=${selectedYear}`,{
-      headers: ApiService.getHeader(),
-    })
-      .then((response) => response.json())
-      .then((data) => {
+    const fetchManagers = async () => {
+      try {
+        const data = await ApiService.fetchTop5ManagersTable(selectedYear);
         setManagers(data);
         setFilteredManagers(data);
-      })
-      .catch((error) => console.error("Error fetching managers data:", error));
+      } catch (error) {
+        console.error(error.message);
+      }
+    };
+
+    fetchManagers();
   }, [selectedYear]);
+
 
   const handleSearch = (e) => {
     const term = e.target.value.toLowerCase();

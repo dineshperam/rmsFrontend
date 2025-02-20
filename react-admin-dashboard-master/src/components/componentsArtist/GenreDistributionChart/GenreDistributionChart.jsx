@@ -2,27 +2,25 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import ApiService from "../../../service/ApiService";
-import axios from "axios";
 
 const COLORS = ["#6366F1", "#8B5CF6", "#EC4899", "#10B981", "#F59E0B"];
 
 const GenreDistributionChart = () => {
 	const [genreData, setGenreData] = useState([]);
-    const artistId = ApiService.getUserId();
+	const artistId = ApiService.getUserId();
 
 	useEffect(() => {
-		const fetchGenreData = async () => {
-			try {
-				const response = await axios.get(`http://localhost:8080/insights/genre-count/${artistId}`);
-				const data = await response.json();
-				const formattedData = Object.entries(data).map(([name, value]) => ({ name, value }));
-				setGenreData(formattedData);
-			} catch (error) {
-				console.error("Error fetching genre data:", error);
-			}
-		};
+		const fetchData = async () => {
+            try {
+                const data = await ApiService.fetchGenreData(artistId);
+                const formattedData = Object.entries(data).map(([name, value]) => ({ name, value }));
+                setGenreData(formattedData);
+            } catch (error) {
+                console.error("Error fetching genre data:", error);
+            }
+        };
 
-		fetchGenreData();
+        fetchData();
 	}, [artistId]);
 
 	return (

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { FaLock, FaEye, FaEyeSlash, FaUser, FaKey } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
+import ApiService from "../../service/ApiService";
 
 const ChangePassword = () => {
   const [data, setData] = useState({
@@ -32,15 +32,10 @@ const ChangePassword = () => {
   const requestOtp = async () => {
     setLoadingOtp(true);
     setOtpButtonDisabled(true);
-    try {
-      await axios.post("http://localhost:8080/user/forgotPassword", {
-        username: data.username,
-      });
+    const success = await ApiService.requestOtp(data.username);
+    if (success) {
       setOtpSent(true);
-      toast.success("OTP sent to your registered email.");
-    } catch (error) {
-      console.error("Error sending OTP:", error.response ? error.response.data : error.message);
-      toast.error("Failed to send OTP.");
+    } else {
       setOtpButtonDisabled(false);
     }
     setLoadingOtp(false);
@@ -49,24 +44,14 @@ const ChangePassword = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (data.newPassword !== data.confirmPassword) {
-        toast.error("Passwords do not match!");
+      toast.error("Passwords do not match!");
       return;
     }
     setLoadingSubmit(true);
-    try {
-      const response = await axios.put("http://localhost:8080/user/updatePassword", {
-        username: data.username,
-        otp: data.otp,
-        newPassword: data.newPassword,
-      });
-      if (response.status === 200) {
-        toast.success("Password changed successfully!");
-        localStorage.removeItem("changePasswordUser");
-        setTimeout(() => navigate("/login"), 2000);
-      }
-    } catch (error) {
-      console.error("Error updating password:", error);
-      toast.error("Failed to update password. " + (error.response ? error.response.data : ""));
+    const success = await ApiService.updatePassword(data.username, data.otp, data.newPassword);
+    if (success) {
+      localStorage.removeItem("changePasswordUser");
+      setTimeout(() => navigate("/login"), 2000);
     }
     setLoadingSubmit(false);
   };
@@ -104,7 +89,7 @@ const ChangePassword = () => {
             <button
               type="button"
               onClick={requestOtp}
-            //   className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md transition"
+              //   className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md transition"
               disabled={otpButtonDisabled}
               className={`w-full text-white py-3 px-4 rounded-lg transition-colors duration-200 font-medium text-lg shadow-md flex justify-center
                 ${otpButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
@@ -175,7 +160,7 @@ const ChangePassword = () => {
 
               {/* Submit Button */}
               <button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md transition">
-              {loadingSubmit ? "Updating..." : "Change Password"}
+                {loadingSubmit ? "Updating..." : "Change Password"}
               </button>
             </>
           )}

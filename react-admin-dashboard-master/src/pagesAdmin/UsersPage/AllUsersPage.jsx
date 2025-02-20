@@ -6,31 +6,25 @@ import Header from "../../components/common/Header/Header";
 import StatCard from "../../components/common/StatCard/StatCard";
 import AdminAllUsersTable from "../../components/componentsAdmin/AdminAllUsersTable/AdminAllUsersTable";
 import ApiService from "../../service/ApiService";
-import axios from "axios";
 
 const UsersPage = () => {
   const [userStats, setUserStats] = useState({ totalUsers: 0, activeUsers: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUserStats = async () => {
-      try {
-        const activeUsersResponse = await axios.get("http://localhost:8080/insights/active-users-count",{headers: ApiService.getHeader(),});
-        const totalUsersResponse = await axios.get("http://localhost:8080/insights/admin-allusers-count",{headers: ApiService.getHeader(),});
-
-        const activeUsers = await activeUsersResponse.json();
-        const totalUsers = await totalUsersResponse.json();
-
-        setUserStats({ totalUsers, activeUsers });
-      } catch (error) {
-        console.error("Error fetching user stats:", error);
-      } finally {
-        setLoading(false);
-      }
+    const fetchData = async () => {
+        try {
+            const stats = await ApiService.fetchUserStats();
+            setUserStats(stats);
+        } catch (error) {
+            console.error("Error fetching user stats:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    fetchUserStats();
-  }, []);
+    fetchData();
+}, []);
 
   return (
     <div className='flex-1 overflow-auto relative z-10'>
