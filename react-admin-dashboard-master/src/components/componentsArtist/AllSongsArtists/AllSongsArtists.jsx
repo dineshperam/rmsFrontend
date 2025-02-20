@@ -13,7 +13,7 @@ const AllSongsArtists = () => {
   useEffect(() => {
     const getSongs = async () => {
       try {
-        const data = await ApiService.fetchSongs();
+        const data = await ApiService.fetchSongsArtists();
         setSongs(data);
         setFilteredSongs(data);
       } catch (err) {

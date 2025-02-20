@@ -699,7 +699,7 @@ static async exportTransPDF() {
 
       static async fetchContactRequests() {
         try {
-          const response = await axios.get(`${this.BASE_URL}/contact/showContacts`);
+          const response = await axios.get(`${this.BASE_URL}/api/contact/showContacts`);
           return response.data.filter((request) => request.status === "Pending");
         } catch (error) {
           console.error("Error fetching contact requests:", error);

@@ -21,17 +21,17 @@ const OverviewPageArtist = () => {
   const userId = ApiService.getUserId()
   useEffect(() => {
     const fetchArtistStats = async () => {
-        try {
-            const stats = await ApiService.fetchStats(userId);
-            setStats(stats);
-            setError(null);
-        } catch (error) {
-            setError("Failed to load statistics. Please try again later.");
-        }
+      try {
+        const fetchedStats = await ApiService.fetchStats(userId);
+        setStats(fetchedStats); // No need to manually map keys if they match
+        setError(null);
+      } catch (error) {
+        setError("Failed to load statistics. Please try again later.");
+      }
     };
 
     fetchArtistStats();
-}, [userId]);
+  }, [userId]);
 
 
   const formatNumber = (num) => {
@@ -57,21 +57,22 @@ const OverviewPageArtist = () => {
           <StatCard
             name="My Songs"
             icon={GalleryVerticalEnd}
-            value={formatNumber(stats.mySongss)}
+            value={formatNumber(stats.mySongs)} // Correct key
             color="#6366F1"
           />
           <StatCard
             name="My Revenue"
             icon={CircleDollarSign}
-            value={formatNumber(stats.myRevenues)}
+            value={formatNumber(stats.myRevenue)} // Correct key
             color="#8B5CF6"
           />
           <StatCard
             name="Total Streams"
             icon={ChartNoAxesCombined}
-            value={formatNumber(stats.myStreamss)}
+            value={formatNumber(stats.myStreams)} // Correct key
             color="#EC4899"
           />
+
 
         </motion.div>
 
