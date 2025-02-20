@@ -5,17 +5,17 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ApiService from "../../../service/ApiService";
 import { format } from "date-fns";
-
+ 
 const Royalties = () => {
   const [royalties, setRoyalties] = useState([]);
   const [loadingId, setLoadingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+ 
   useEffect(() => {
     fetchRoyalties();
   }, []);
-
+ 
   const fetchRoyalties = async () => {
     try {
       const response = await ApiService.getRoyalties();
@@ -27,25 +27,25 @@ const Royalties = () => {
       setLoading(false);
     }
   };
-
+ 
   const handlePayment = async (royalty) => {
     if (!window.confirm(`Process payment of $${royalty.royaltyAmount}?`)) return;
-
+ 
     setLoadingId(royalty.royaltyId);
-
+ 
     try {
       const adminId = ApiService.getUserId();
       const response = await ApiService.payRoyalty(royalty.royaltyId, adminId);
-
+ 
       if (response.error) {
         throw new Error(response.error);
       }
-
+ 
       toast.success(`Royalty of $${royalty.royaltyAmount} paid successfully!`, {
         position: "top-right",
         autoClose: 2000,
       });
-
+ 
       // Update the UI to mark the payment as PAID
       setRoyalties((prev) =>
         prev.map((r) =>
@@ -62,10 +62,26 @@ const Royalties = () => {
       setLoadingId(null);
     }
   };
-
+  const handleCalculate = async () => {
+    try {
+      await ApiService.calculateRoyalties();
+      toast.success("Royalties calculated successfully!", {
+        position: "top-right",
+        autoClose: 2000,
+      });
+      fetchRoyalties();
+    } catch (error) {
+      console.error("Calculation failed:", error);
+      toast.error("Failed to calculate royalties.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+  };
+ 
   if (loading) return <div className="text-gray-300">Loading royalties...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
-
+ 
   return (
     <motion.div
       className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
@@ -75,7 +91,15 @@ const Royalties = () => {
     >
       <h2 className="text-xl font-semibold text-gray-100 text-center mb-6">Royalties</h2>
       <ToastContainer />
-
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={handleCalculate}
+          className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg transition duration-300"
+        >
+          Calculate Royalties
+        </button>
+      </div>
+ 
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-700">
           <thead>
@@ -122,5 +146,5 @@ const Royalties = () => {
     </motion.div>
   );
 };
-
+ 
 export default Royalties;

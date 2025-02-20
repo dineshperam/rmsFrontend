@@ -239,16 +239,16 @@ static async respondToPartnershipRequest(requestId, status) {
     }
 }
 
-
-
-    static async getRoyalties() {
-    const response = await axios.get(`${this.BASE_URL}/royalty/royaltyList`, {
-        headers: this.getHeader(),
-    });
-    if (!response.ok) {
+static async getRoyalties() {
+    try {
+        const response = await axios.get(`${this.BASE_URL}/royalty/royaltyList`, {
+            headers: this.getHeader(),
+        });
+        return response.data; // Axios automatically parses JSON
+    } catch (error) {
+        console.error("Error fetching royalties:", error);
         throw new Error("Failed to fetch royalties");
     }
-    return await response.json();
 }
 
 static async getPendingPartnershipRequest(artistId) {
@@ -263,7 +263,7 @@ static async getPendingPartnershipRequest(artistId) {
 
 static async getTotalSongs(managerId) {
     try {
-        const response = await axios.get(`${this.BASE_URL}/total-songs/${managerId}`, { headers: this.getHeader() });
+        const response = await axios.get(`${this.BASE_URL}/insights/total-songs/${managerId}`, { headers: this.getHeader() });
         return response.data;
     } catch (error) {
         console.error("Error fetching total songs:", error);
@@ -273,7 +273,7 @@ static async getTotalSongs(managerId) {
 
 static async getTotalStreams(managerId) {
     try {
-        const response = await axios.get(`${this.BASE_URL}/total-streams/${managerId}`, { headers: this.getHeader() });
+        const response = await axios.get(`${this.BASE_URL}/insights/total-streams/${managerId}`, { headers: this.getHeader() });
         return response.data;
     } catch (error) {
         console.error("Error fetching total streams:", error);
@@ -283,7 +283,7 @@ static async getTotalStreams(managerId) {
 
 static async getManagerRevenue(managerId) {
     try {
-        const response = await axios.get(`${this.BASE_URL}/manager-revenue/${managerId}`, { headers: this.getHeader() });
+        const response = await axios.get(`${this.BASE_URL}/insights/manager-revenue/${managerId}`, { headers: this.getHeader() });
         return response.data;
     } catch (error) {
         console.error("Error fetching manager revenue:", error);
@@ -293,7 +293,7 @@ static async getManagerRevenue(managerId) {
 
 static async getTotalRevenue(managerId) {
     try {
-        const response = await axios.get(`${this.BASE_URL}/total-revenue/${managerId}`, { headers: this.getHeader() });
+        const response = await axios.get(`${this.BASE_URL}/insights/total-revenue/${managerId}`, { headers: this.getHeader() });
         return response.data;
     } catch (error) {
         console.error("Error fetching total revenue:", error);
@@ -342,6 +342,7 @@ static async exportTransByManagerPDF(managerId) {
         throw error;
     }
 }
+
 static async exportPartnershipPDF(artistId) {
     try {
         const response = await axios.get(`${this.BASE_URL}/partnerships/export-pdf-partner/${artistId}`, {
@@ -355,6 +356,31 @@ static async exportPartnershipPDF(artistId) {
         throw error;
     }
 }
+
+static async requestOtp(username) {
+    try {
+        const response = await axios.post(`${this.BASE_URL}/user/forgotPassword`, { username });
+        return response.data;
+    } catch (error) {
+        console.error("Error sending OTP:", error.response ? error.response.data : error.message);
+        throw error;
+    }
+}
+
+static async resetPassword(username, otp, newPassword) {
+    try {
+        const response = await axios.put(`${this.BASE_URL}/user/updatePassword`, {
+            username,
+            otp,
+            newPassword
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error resetting password:", error.response ? error.response.data : error.message);
+        throw error;
+    }
+}
+
 
 static async exportTransPDF() {
     try {
@@ -443,7 +469,15 @@ static async exportTransPDF() {
         }
     }
 
-    
+    static async calculateRoyalties() {
+        try {
+            const response = await axios.get(`${this.BASE_URL}/royalty/calculate`, { headers: this.getHeader() });
+            return response.data;
+        } catch (error) {
+            console.error("Error calculating royalties:", error);
+            throw error;
+        }
+    }
     
     static showSessionExpiredDialog() {
         const dialog = document.createElement('div');
@@ -469,7 +503,57 @@ static async exportTransPDF() {
         localStorage.clear();
         window.location.href = "/login"; // Ensure navigation on session expiry
     }
-    
-    
 
+    static async getActiveArtistsCount() {
+        try {
+            const response = await axios.get(`${this.BASE_URL}/insights/active-artists-count`, { headers: this.getHeader() });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching active artists count:", error);
+            throw error;
+        }
+    }
+    
+    static async getActiveManagersCount() {
+        try {
+            const response = await axios.get(`${this.BASE_URL}/insights/active-managers-count`, { headers: this.getHeader() });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching active managers count:", error);
+            throw error;
+        }
+    }
+    
+    static async getTotalRoyaltiesPaid() {
+        try {
+            const response = await axios.get(`${this.BASE_URL}/insights/total-royalties-paid`, { headers: this.getHeader() });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching total royalties paid:", error);
+            throw error;
+        }
+    }
+    
+    static async getTotalStreamsCount() {
+        try {
+            const response = await axios.get(`${this.BASE_URL}/insights/total-streams-count`, { headers: this.getHeader() });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching total streams count:", error);
+            throw error;
+        }
+    }
+
+    static async getTop5Artists(year) {
+        try {
+            const response = await axios.get(`${this.BASE_URL}/insights/top5artists?year=${year}`, {
+                headers: this.getHeader(),
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching top 5 artists:", error);
+            throw error;
+        }
+    }    
+    
 }

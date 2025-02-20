@@ -19,40 +19,34 @@ const OverviewPageManager= () => {
     const managerId = ApiService.getManagerId()
 
     useEffect(() => {
-        const fetchStats = async () => {
+      const fetchStats = async () => {
           try {
-            const [totalSongs, totalStr, managerRev, totalRev] = await Promise.all([
-                    ApiService.getTotalSongs(managerId),
-                    ApiService.getTotalStreams(managerId),
-                    ApiService.getManagerRevenue(managerId),
-                    ApiService.getTotalRevenue(managerId)
-            ]);
-    
-            // Check if responses are ok
-            if (!totalSongs.ok || !totalStr.ok || !managerRev.ok || !totalRev.ok) {
-              throw new Error('One or more requests failed');
-            }
-    
-            const totalArtistSongs = await totalSongs.json();
-            const totalArtistStreams = await totalStr.json();
-            const managerRevenue = await managerRev.json();
-            const artistTotalRevenue = await totalRev.json();
-    
-            setStats({
-                totalArtistSongs,
-                totalArtistStreams,
-                managerRevenue,
-                artistTotalRevenue
-            });
-            setError(null);
+              const [totalSongs, totalStreams, managerRev, totalRev] = await Promise.all([
+                  ApiService.getTotalSongs(managerId),
+                  ApiService.getTotalStreams(managerId),
+                  ApiService.getManagerRevenue(managerId),
+                  ApiService.getTotalRevenue(managerId)
+              ]);
+  
+              // Set the state directly since Axios returns response data
+              setStats({
+                  totalArtistSongs: totalSongs || 0,
+                  totalArtistStreams: totalStreams || 0,
+                  managerRevenue: managerRev || 0,
+                  artistTotalRevenue: totalRev || 0
+              });
+  
+              setError(null);
           } catch (error) {
-            console.error('Error fetching stats:', error);
-            setError('Failed to load statistics. Please try again later.');
+              console.error("Error fetching stats:", error);
+              setError("Failed to load statistics. Please try again later.");
           }
-        };
-    
-        fetchStats();
-      }, [managerId]);
+      };
+  
+      if (managerId) {
+          fetchStats();
+      }
+  }, [managerId]);
 
       const formatNumber = (num) => {
         return new Intl.NumberFormat('en-US').format(num);
@@ -82,7 +76,7 @@ const OverviewPageManager= () => {
               transition={{ duration: 1 }}
             >
               <StatCard 
-                name="Artist's Songs'" 
+                name="Artist's Songs" 
                 icon={Users} 
                 value={formatNumber(stats.totalArtistSongs)} 
                 color="#6366F1" 

@@ -8,7 +8,6 @@ import ManagersTable from '../../components/componentsAdmin/ManagersTable/Manage
 import ChartArtists from '../../components/componentsAdmin/ChartArtists/ChartArtists';
 import ChartManagers from '../../components/componentsAdmin/ChartManagers/ChartManagers';
 import ApiService from '../../service/ApiService';
-import axios from 'axios';
 
 const OverviewPage = () => {
   const [stats, setStats] = useState({
@@ -19,44 +18,23 @@ const OverviewPage = () => {
   });
   const [error, setError] = useState(null);
 
-  // You might want to store this in an environment variable
-  const BASE_URL = 'http://localhost:8080/insights'; // Adjust this to match your backend URL
-
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [artistsRes, managersRes, royaltiesRes, streamsRes] = await Promise.all([
-          axios.get(`${BASE_URL}/active-artists-count`,{headers: ApiService.getHeader(),}),
-          axios.get(`${BASE_URL}/active-managers-count`,{headers: ApiService.getHeader(),}),
-          axios.get(`${BASE_URL}/total-royalties-paid`,{headers: ApiService.getHeader(),}),
-          axios.get(`${BASE_URL}/total-streams-count`,{headers: ApiService.getHeader(),}),{
-            headers: ApiService.getHeader(),
-          }
+        const [activeArtists, activeManagers, totalRoyalties, totalStreams] = await Promise.all([
+          ApiService.getActiveArtistsCount(),
+          ApiService.getActiveManagersCount(),
+          ApiService.getTotalRoyaltiesPaid(),
+          ApiService.getTotalStreamsCount(),
         ]);
 
-        // Check if responses are ok
-        if (!artistsRes.ok || !managersRes.ok || !royaltiesRes.ok || !streamsRes.ok) {
-          throw new Error('One or more requests failed');
-        }
-
-        const activeArtists = await artistsRes.json();
-        const activeManagers = await managersRes.json();
-        const totalRoyalties = await royaltiesRes.json();
-        const totalStreams = await streamsRes.json();
-
-        setStats({
-          activeArtists,
-          activeManagers,
-          totalRoyalties,
-          totalStreams
-        });
+        setStats({ activeArtists, activeManagers, totalRoyalties, totalStreams });
         setError(null);
       } catch (error) {
-        console.error('Error fetching stats:', error);
-        setError('Failed to load statistics. Please try again later.');
+        console.error("Error fetching stats:", error);
+        setError("Failed to load statistics. Please try again later.");
       }
     };
-
     fetchStats();
   }, []);
 

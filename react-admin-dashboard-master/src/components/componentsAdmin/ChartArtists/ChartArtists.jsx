@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import ApiService from "../../../service/ApiService";
-import axios from "axios";
 
 const ChartArtists = () => {
 	const [selectedTimeRange, setSelectedTimeRange] = useState("2024");
@@ -10,27 +9,25 @@ const ChartArtists = () => {
 	const [artistKeys, setArtistKeys] = useState([]); // Store artist names dynamically
 
 	useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const response = await axios.get(`http://localhost:8080/insights/top5artists?year=${selectedTimeRange}`,{
-		headers: ApiService.getHeader(),});
-      const data = await response.json();
+        const fetchData = async () => {
+            try {
+                const data = await ApiService.getTop5Artists(selectedTimeRange);
 
-      // Find the first row that contains artist data
-      const firstValidRow = data.find(row => Object.keys(row).length > 1);
-      if (firstValidRow) {
-        const extractedKeys = Object.keys(firstValidRow).filter(key => key !== "month");
-        setArtistKeys(extractedKeys);
-      }
+                // Find the first row that contains artist data
+                const firstValidRow = data.find(row => Object.keys(row).length > 1);
+                if (firstValidRow) {
+                    const extractedKeys = Object.keys(firstValidRow).filter(key => key !== "month");
+                    setArtistKeys(extractedKeys);
+                }
 
-      setRevenueData(data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+                setRevenueData(data);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
 
-  fetchData();
-}, [selectedTimeRange]);
+        fetchData();
+    }, [selectedTimeRange]);
 
 
 	return (
@@ -50,7 +47,7 @@ const ChartArtists = () => {
 					<option value="2025">2025</option>
 					<option value="2024">2024</option>
 					<option value="2023">2023</option>
-					
+
 				</select>
 			</div>
 

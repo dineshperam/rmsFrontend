@@ -1,138 +1,184 @@
 import { useState } from "react";
-import axios from "axios";
+import { Mail, Key, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-
-const styles = {
-    container: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#f4f4f4",
-        zIndex: 1000,
-    },
-    card: {
-        padding: "30px",
-        borderRadius: "10px",
-        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-        backgroundColor: "#fff",
-        textAlign: "center",
-        minWidth: "300px",
-    },
-    input: {
-        width: "100%",
-        padding: "10px",
-        margin: "10px 0",
-        border: "1px solid #ddd",
-        borderRadius: "5px",
-        color: "#000",
-    },
-    button: {
-        width: "100%",
-        padding: "12px",
-        backgroundColor: "#4CAF50",
-        color: "white",
-        border: "none",
-        borderRadius: "5px",
-        cursor: "pointer",
-        fontSize: "16px",
-    },
-    errorMessage: {
-        color: "red",
-        marginTop: "10px",
-    },
-};
+import axios from "axios";
+import { toast } from "react-toastify";
+import { motion } from "framer-motion";
 
 const ForgotPassword = () => {
-    const [username, setUsername] = useState("");
-    const [otp, setOtp] = useState("");
-    const [newPassword, setNewPassword] = useState("");
-    const [otpSent, setOtpSent] = useState(false);
+  const [username, setUsername] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [otpButtonDisabled, setOtpButtonDisabled] = useState(false);
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
+  const requestOtp = async () => {
+    if (!username.trim()) {
+      toast.error("Please enter your username.");
+      return;
+    }
+    setLoading(true);
+    setOtpButtonDisabled(true);
 
-    const requestOtp = async () => {
-        if (!username.trim()) {
-            toast.error("Please enter your username.", { position: "top-right", autoClose: 2000 });
-            return;
-        }
-        try {
-            await axios.post("http://localhost:8080/user/forgotPassword", { username });
-            setOtpSent(true);
-            toast.success("OTP sent to your email!", { position: "top-right", autoClose: 2000 });
-        } catch (error) {
-            console.error("Error sending OTP:", error.response ? error.response.data : error.message);
-            toast.error("Failed to send OTP. Please try again.", { position: "top-right", autoClose: 3000 });
-        }
-    };
+    try {
+      await axios.post("http://localhost:8080/user/forgotPassword", { username });
+      setOtpSent(true);
+      toast.success("OTP sent to your email!");
+      // Removed alert, using only toast notification
+    } catch (error) {
+      console.error("Error sending OTP:", error.response ? error.response.data : error.message);
+      toast.error("Failed to send OTP. Please try again.");
+      setOtpButtonDisabled(false);
+    }
+    setLoading(false);
+  };
 
-    const resetPassword = async () => {
-        if (!otp.trim()) {
-            toast.error("Please enter the OTP.", { position: "top-right", autoClose: 2000 });
-            return;
-        }
-        if (!newPassword.trim()) {
-            toast.error("Please enter a new password.", { position: "top-right", autoClose: 2000 });
-            return;
-        }
-        try {
-            const response = await axios.put("http://localhost:8080/user/updatePassword", {
-                username,
-                otp,
-                newPassword
-            });
-            toast.success(response.data, { position: "top-right", autoClose: 2000 });
-            setTimeout(() => navigate("/login"), 2500);
-        } catch (error) {
-            console.error("Error resetting password:", error.response ? error.response.data : error.message);
-            toast.error("Failed to reset password. " + (error.response ? error.response.data : ""), {
-                position: "top-right",
-                autoClose: 3000
-            });
-        }
-    };
+  const resetPassword = async () => {
+    if (!otp.trim()) {
+      toast.error("Please enter the OTP.");
+      return;
+    }
+    if (!newPassword.trim()) {
+      toast.error("Please enter a new password.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match!");
+      return;
+    }
+    try {
+      const response = await axios.put("http://localhost:8080/user/updatePassword", {
+        username,
+        otp,
+        newPassword
+      });
+      toast.success(response.data || "Password successfully changed!");
+      // Removed alert, using only toast notification
+      setTimeout(() => navigate("/login"), 2000);
+    } catch (error) {
+      console.error("Error resetting password:", error.response ? error.response.data : error.message);
+      toast.error("Failed to reset password. " + (error.response ? error.response.data : ""));
+    }
+  };
 
-    return (
-        <div style={styles.container}>
-            <ToastContainer />
-            <div style={styles.card}>
-                <h2>Forgot Password</h2>
-                <input 
-                    type="text" 
-                    value={username} 
-                    onChange={(e) => setUsername(e.target.value)} 
-                    placeholder="Username" 
-                    style={styles.input}
-                />
-                {!otpSent && <button style={styles.button} onClick={requestOtp}>Send OTP</button>}
-                {otpSent && (
-                    <>
-                        <input 
-                            type="text" 
-                            value={otp} 
-                            onChange={(e) => setOtp(e.target.value)} 
-                            placeholder="Enter OTP" 
-                            style={styles.input}
-                        />
-                        <input 
-                            type="password" 
-                            value={newPassword} 
-                            onChange={(e) => setNewPassword(e.target.value)} 
-                            placeholder="New Password" 
-                            style={styles.input}
-                        />
-                        <button style={styles.button} onClick={resetPassword}>Reset Password</button>
-                    </>
-                )}
-            </div>
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!otpSent) {
+      requestOtp();
+    } else {
+      resetPassword();
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen w-full bg-cover bg-center px-4"
+      style={{ backgroundImage: "url('/23.png')" }}
+    >
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }} 
+        animate={{ opacity: 1, scale: 1 }} 
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md p-8 bg-white shadow-2xl rounded-2xl"
+      >
+        <div className="mb-2">
+          <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Forgot Password</h2>
+          {!otpSent ? (
+            <>
+              <p className="text-gray-600 text-center mb-8">
+                Enter your username and we'll send an OTP to your registered email.
+              </p>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="flex items-center border-2 border-gray-300 rounded-lg overflow-hidden focus-within:border-blue-500 transition-colors">
+                  <span className="px-4 py-3 text-gray-500 bg-gray-50 border-r border-gray-300">
+                    <Mail className="w-5 h-5" />
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="Enter your username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full py-3 px-4 focus:outline-none text-gray-700"
+                    required
+                  />
+                </div>
+                <motion.button 
+                  whileTap={{ scale: 0.95 }}
+                  type="submit"
+                  disabled={otpButtonDisabled} 
+                  className={`w-full text-white py-3 px-4 rounded-lg transition-colors duration-200 font-medium text-lg shadow-md flex justify-center
+                  ${otpButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
+                >
+                  {loading ? <div className="h-5 w-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div> : "Send OTP"}
+                </motion.button>
+              </form>
+            </>
+          ) : (
+            <>
+              <p className="text-gray-600 text-center mb-8">
+                Enter the OTP sent to your email and your new password.
+              </p>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="flex items-center border-2 border-gray-300 rounded-lg overflow-hidden focus-within:border-blue-500 transition-colors mb-4">
+                  <span className="px-4 py-3 text-gray-500 bg-gray-50 border-r border-gray-300">
+                    <Key className="w-5 h-5" />
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="Enter OTP"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    className="w-full py-3 px-4 focus:outline-none text-gray-700"
+                    required
+                  />
+                </div>
+                <div className="flex items-center border-2 border-gray-300 rounded-lg overflow-hidden focus-within:border-blue-500 transition-colors">
+                  <span className="px-4 py-3 text-gray-500 bg-gray-50 border-r border-gray-300">
+                    <Lock className="w-5 h-5" />
+                  </span>
+                  <input
+                    type="password"
+                    placeholder="New Password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full py-3 px-4 focus:outline-none text-gray-700"
+                    required
+                  />
+                </div>
+                <div className="flex items-center border-2 border-gray-300 rounded-lg overflow-hidden focus-within:border-blue-500 transition-colors">
+                  <span className="px-4 py-3 text-gray-500 bg-gray-50 border-r border-gray-300">
+                    <Lock className="w-5 h-5" />
+                  </span>
+                  <input
+                    type="password"
+                    placeholder="Confirm Password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full py-3 px-4 focus:outline-none text-gray-700"
+                    required
+                  />
+                </div>
+                <motion.button 
+                  whileTap={{ scale: 0.95 }}
+                  type="submit" 
+                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium text-lg shadow-md"
+                >
+                  Reset Password
+                </motion.button>
+              </form>
+            </>
+          )}
+          <div className="text-center mt-6">
+            <a href="/login" className="text-blue-600 hover:text-blue-800 transition-colors">
+              Return to Login
+            </a>
+          </div>
         </div>
-    );
+      </motion.div>
+    </div>
+  );
 };
 
 export default ForgotPassword;
