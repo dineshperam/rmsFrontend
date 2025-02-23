@@ -1,59 +1,83 @@
 import { useState } from "react";
 import Header from "../../common/Header/Header";
 import ApiService from "../../../service/ApiService";
+import { toast } from "react-toastify";
 
 const AddSong = () => {
   const [song, setSong] = useState({
     title: "",
     releaseDate: "",
     collaborators: "",
-    genre:""
+    genre: "",
   });
- 
+
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState({});
 
   const artistId = ApiService.getUserId();
- 
-  // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split("T")[0];
 
   const genres = ["Pop", "Rock", "Jazz", "Folk", "Classical"];
 
- 
-  const handleChange = (event) => {
-    setSong({
-      ...song,
-      [event.target.name]: event.target.value,
-    });
+  const validateField = (name, value) => {
+    let errorMsg = "";
+
+    if (name === "title") {
+      if (!value.trim()) {
+        errorMsg = "Title is required.";
+      } else if (!/^[A-Za-z\s]+$/.test(value)) {
+        errorMsg = "Title can only contain alphabets and spaces.";
+      }
+    } else if (name === "releaseDate") {
+      if (!value) {
+        errorMsg = "Release date is required.";
+      } else if (value > today) {
+        errorMsg = "Release date cannot be in the future.";
+      }
+    } else if (name === "genre" && !value) {
+      errorMsg = "Genre is required.";
+    }
+
+    return errorMsg;
   };
- 
-  const validateForm = () => {
-    let validationErrors = {};
-    const today = new Date().toISOString().split("T")[0];
 
-    if (!song.title.trim()) {
-      validationErrors.title = "Title is required.";
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    // Prevent invalid input for title before setting state
+    if (name === "title" && !/^[A-Za-z\s]*$/.test(value)) {
+      return;
     }
 
-    if (!song.genre) {
-      validationErrors.genre = "Genre is required.";
-    }
+    // Update song state and validate field on change
+    setSong((prevSong) => ({
+      ...prevSong,
+      [name]: value,
+    }));
 
-    if (!song.releaseDate) {
-      validationErrors.releaseDate = "Release date is required.";
-    } else if (song.releaseDate > today) {
-      validationErrors.releaseDate = "Release date cannot be in the future.";
-    }
-
-    setErrors(validationErrors);
-    return Object.keys(validationErrors).length === 0;
+    // Set errors for the field
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: validateField(name, value),
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
+    // Validate all fields on submit
+    const newErrors = {
+      title: validateField("title", song.title),
+      releaseDate: validateField("releaseDate", song.releaseDate),
+      genre: validateField("genre", song.genre),
+    };
+
+    setErrors(newErrors);
+
+    // If any error message exists, do not submit the form
+    if (Object.values(newErrors).some((error) => error)) {
+      return;
+    }
 
     const response = await ApiService.addSong(song, artistId);
     setMessage(response.message);
@@ -65,6 +89,7 @@ const AddSong = () => {
         collaborators: "",
         genre: "",
       });
+      toast.success("Song Added Successfully");
       setErrors({});
     }
   };
@@ -72,7 +97,7 @@ const AddSong = () => {
   return (
     <div className="flex-1 overflow-auto relative z-10 min-h-screen">
       <Header title="Add Song" />
-      <main className=" mx-auto py-6 px-4 lg:px-8">
+      <main className="mx-auto py-6 px-4 lg:px-8">
         {message && (
           <p
             className={`text-center text-sm font-semibold p-2 rounded ${
@@ -82,51 +107,59 @@ const AddSong = () => {
             {message}
           </p>
         )}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="block text-lg">Title:</label>
+            <label htmlFor="title" className="block text-lg">
+              Title:
+            </label>
             <input
+              id="title"
               type="text"
               name="title"
               value={song.title}
               onChange={handleChange}
-              required
               className="w-full p-2 text-black border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
             />
             {errors.title && <p className="text-red-600 text-sm">{errors.title}</p>}
           </div>
           <div>
-            <label className="block text-lg ">Release Date:</label>
+            <label htmlFor="releaseDate" className="block text-lg">
+              Release Date:
+            </label>
             <input
+              id="releaseDate"
               type="date"
               name="releaseDate"
               value={song.releaseDate}
               onChange={handleChange}
-              max={today}
               required
+              max={today}
               className="w-full p-2 text-black border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
             />
             {errors.releaseDate && <p className="text-red-600 text-sm">{errors.releaseDate}</p>}
           </div>
           <div>
-            <label className="block text-lg ">Collaborators:</label>
+            <label htmlFor="collaborators" className="block text-lg">
+              Collaborators:
+            </label>
             <input
+              id="collaborators"
               type="text"
               name="collaborators"
               value={song.collaborators}
               onChange={handleChange}
-              required
               className="w-full p-2 text-black border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
             />
-           
           </div>
           <div>
-            <label className="block text-lg">Genre:</label>
+            <label htmlFor="genre" className="block text-lg">
+              Genre:
+            </label>
             <select
+              id="genre"
               name="genre"
               value={song.genre}
               onChange={handleChange}
-              required
               className="w-full p-2 text-black border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
             >
               <option value="">Select Genre</option>
@@ -149,5 +182,5 @@ const AddSong = () => {
     </div>
   );
 };
- 
+
 export default AddSong;

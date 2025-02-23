@@ -9,7 +9,7 @@ const TopArtistsRevenue = () => {
   const [filteredArtists, setFilteredArtists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   const managerId = ApiService.getManagerId(); // Fetch manager ID
 
   useEffect(() => {
@@ -93,13 +93,13 @@ const TopArtistsRevenue = () => {
                   transition={{ duration: 0.3 }}
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {artist[0]?.firstName} {artist[0]?.lastName}
+                    {artist[1]} {artist[4]}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                  ₹{artist[1].toFixed(2)}
+                    {typeof artist[15] === 'number' ? `₹${artist[15].toFixed(2)}` : 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {artist[0]?.email}
+                    {artist[2]}
                   </td>
                 </motion.tr>
               ))

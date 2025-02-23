@@ -12,6 +12,7 @@ const Profile = () => {
       try {
         const userInfo = await ApiService.getLoggedInUsesInfo();
         const filteredUser = {
+          userid : userInfo.userid,
           username: userInfo.username,
           email: userInfo.email,
           firstName: userInfo.firstName,
@@ -52,6 +53,7 @@ const Profile = () => {
               Hello, {user.firstName} {user.lastName} 
             </h1><br/>
             <div className="space-y-4 text-white">
+              <ProfileItem label="UserId" value={user.userid} />
               <ProfileItem label="Username" value={user.username} />
               <ProfileItem label="Email" value={user.email} />
               <ProfileItem label="Phone Number" value={user.mobileNo} />

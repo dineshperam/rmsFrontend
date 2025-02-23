@@ -15,7 +15,7 @@ export const AdminRoute = ({ element }) => {
     return ApiService.isAdmin() ? (
         element
     ) : (
-        <Navigate to="/adminDashboard" replace state={{ from: location }} />
+        <Navigate to="/admin-dashboard" replace state={{ from: location }} />
     );
 };
 
@@ -24,7 +24,7 @@ export const ArtistRoute = ({ element }) => {
     return ApiService.isArtist() ? (
         element
     ) : (
-        <Navigate to="/artistDashboard" replace state={{ from: location }} />
+        <Navigate to="/artist-dashboard" replace state={{ from: location }} />
     );
 };
 
@@ -33,6 +33,6 @@ export const ManagerRoute = ({ element }) => {
     return ApiService.isManager() ? (
         element
     ) : (
-        <Navigate to="/login" replace state={{ from: location }} />
+        <Navigate to="/manager-dashboard" replace state={{ from: location }} />
     );
 };

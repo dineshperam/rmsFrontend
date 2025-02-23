@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, ChevronDown, Loader2, Download } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, Download } from "lucide-react";
 import ApiService from "../../../service/ApiService";
 import { sortTransactions, filterByField } from "../../../utils/SortFilter";
 import { paginate, getPageNumbers } from "../../../utils/Paginate";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
-const pageSize = 10; // Records per page
+const pageSize = 10;
 
 const ArtistsTransTable = () => {
   const [transactions, setTransactions] = useState([]);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [exporting, setExporting] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [transactionSearch, setTransactionSearch] = useState("");
@@ -24,19 +25,18 @@ const ArtistsTransTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-          const data = await ApiService.fetchTransactionsById();
-          setTransactions(data);
-          setFilteredTransactions(data);
+        const data = await ApiService.fetchTransactionsById();
+        setTransactions(data);
+        setFilteredTransactions(data);
       } catch (err) {
-          setError(err.message);
+        setError(err.message);
       } finally {
-          setLoading(false);
+        setLoading(false);
       }
-  };
-  fetchData();
+    };
+    fetchData();
   }, []);
 
-  // ✅ Filtering logic
   useEffect(() => {
     let result = transactions;
     if (transactionSearch) {
@@ -49,47 +49,148 @@ const ArtistsTransTable = () => {
       result = sortTransactions(result, sortField, sortOrder);
     }
     setFilteredTransactions(result);
-    setCurrentPage(1); // Reset to first page when filtering
+    setCurrentPage(1);
   }, [transactionSearch, receiverSearch, sortField, sortOrder, transactions]);
 
-  // ✅ Paginate data
-  const paginatedTransactions = paginate(filteredTransactions, currentPage, pageSize);
-  const { startPage, endPage, totalPages } = getPageNumbers(filteredTransactions.length, currentPage, pageSize);
+  // Ensure your logo is placed in the assets folder
 
-  const handlePageChange = (page) => {
-    if (page > 0 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+  const handleDownloadPDF = (transaction) => {
+    const doc = new jsPDF();
+
+
+    // ✅ Set navy blue background (HEX: #001f3f)
+    doc.setFillColor(0, 31, 63); // RGB for Navy Blue
+    doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, "F"); // "F" = fill
+
+    // ✅ Set text color to white for visibility
+    doc.setTextColor(255, 255, 255);
+
+    //logo
+    const logoURL = "http://localhost:5173/RM_Latest1.png";
+
+    doc.addImage(logoURL, "PNG", 14, 10, 30, 12);
+
+
+    // ✅ Title
+    doc.setFontSize(18);
+    doc.text("Invoice Details", 105, 30, null, null, "center");
+
+    // ✅ Company Details
+    doc.setFontSize(12);
+    doc.text("Royal Mint", 14, 50);
+    doc.text("Dr. M.H Marigowda Road", 14, 57);
+    doc.text("Bangalore, Karnataka 560029", 14, 64);
+    doc.text("Phone: 9740659298", 14, 71);
+    doc.text("Email: RoyalMint@gmail.com", 14, 78);
+
+    // ✅ Invoice Details
+    const invoiceData = [
+      ["Invoice No:", `INV-${transaction.transactionId}`],
+      ["Invoice Date:", new Date().toLocaleDateString()],
+      ["Transaction Date:", new Date(transaction.transactionDate).toLocaleString()],
+      ["Customer Name:", transaction.receiver],
+      ["Transaction Type:", transaction.transactionType]
+    ];
+
+    let yPosition = 90;
+    invoiceData.forEach(([label, value]) => {
+      doc.setFontSize(12);
+      doc.text(`${label} ${value}`, 14, yPosition);
+      yPosition += 10;
+    });
+
+    // ✅ Table for Transaction Summary
+    doc.autoTable({
+      startY: yPosition + 10,
+      head: [["Description", "Amount (INR)"]],
+      body: [
+        ["Royalty Payment", `$${transaction.transactionAmount.toFixed(2)}`]
+      ],
+      theme: "grid",
+      styles: { fontSize: 12, cellPadding: 5 },
+    });
+
+    // ✅ Footer
+    doc.setFontSize(10);
+    doc.text("Thank you for your business!", 14, doc.internal.pageSize.height - 20);
+    doc.text("This is a computer-generated invoice and does not require a signature.", 14, doc.internal.pageSize.height - 15);
+
+    // ✅ Save PDF
+    doc.save(`invoice_${transaction.transactionId}.pdf`);
   };
 
-  // ✅ Handle Export as PDF
-  const handleExportPDF = async () => {
-    setExporting(true);
-    try {
-      const userId = ApiService.getUserId();
-      if (!userId) {
-        console.error("User ID not found!");
-        return;
-      }
-      const pdfBlob = await ApiService.exportTransByUsersPDF(userId);
-      
-      // Create a download link
-      const url = window.URL.createObjectURL(new Blob([pdfBlob]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", "transactions.pdf");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error("Error exporting transactions PDF:", error);
-    }finally {
-      setExporting(false);
+  const handleExportPDF = () => {
+    if (filteredTransactions.length === 0) {
+      alert("No transactions to export.");
+      return;
     }
+
+    const doc = new jsPDF();
+
+
+    // ✅ Set navy blue background (HEX: #001f3f)
+    doc.setFillColor(0, 31, 63); // RGB for Navy Blue
+    doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, "F"); // "F" = fill
+
+    // ✅ Set text color to white for visibility
+    doc.setTextColor(255, 255, 255);
+
+    // ✅ Add Logo
+    const logo = `${window.location.origin}/RM_Latest1.png`;
+    doc.addImage(logo, "PNG", 14, 10, 50, 20);
+
+    // ✅ Title
+    doc.setFontSize(18);
+    doc.text("Transactions Report", 105, 30, null, null, "center");
+
+    // ✅ Company Info
+    doc.setFontSize(12);
+    doc.text("Royal Mint", 14, 50);
+    doc.text(" Dr. M.H Marigowda Road", 14, 57);
+    doc.text("Bangalore, Karnataka 560029", 14, 64);
+    doc.text("Phone: 9740659298", 14, 71);
+    doc.text("Email: RoyalMint@gmail.com", 14, 78);
+
+    // ✅ Define Table Columns
+    const columns = [
+      "Transaction ID",
+      "Sender",
+      "Receiver",
+      "Amount (USD)",
+      "Date",
+      "Type"
+    ];
+
+    // ✅ Map Transactions to Table Format
+    const rows = filteredTransactions.map(tx => ([
+      tx.transactionId,
+      tx.sender,
+      tx.receiver,
+      `$${tx.transactionAmount.toFixed(2)}`,
+      new Date(tx.transactionDate).toLocaleString(),
+      tx.transactionType
+    ]));
+
+    // ✅ Generate Table
+    doc.autoTable({
+      startY: 90,
+      head: [columns],
+      body: rows,
+      theme: "grid",
+      styles: { fontSize: 10, cellPadding: 5 },
+    });
+
+    // ✅ Footer
+    doc.setFontSize(10);
+    doc.text("This report contains all recorded transactions.", 14, doc.internal.pageSize.height - 20);
+    doc.text("Generated automatically by the system.", 14, doc.internal.pageSize.height - 15);
+
+    // ✅ Save PDF
+    doc.save("all_transactions.pdf");
   };
 
-  if (loading) return <div className="text-gray-300">Loading data...</div>;
-  if (error) return <div className="text-red-500">Error: {error}</div>;
+
+
 
   return (
     <motion.div
@@ -98,86 +199,51 @@ const ArtistsTransTable = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
     >
-      {/* Header with Export as PDF button */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold text-gray-100">My Transactions</h2>
         <div className="flex gap-4">
           <button
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition flex items-center"
-            onClick={handleExportPDF} disabled={exporting}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+            onClick={handleExportPDF}
           >
-            {exporting ? <Loader2 className="animate-spin mr-2" size={18} /> : <Download className="mr-2" size={18} />} 
-            {exporting ? "Exporting..." : "Export PDF"}
+            Export PDF
           </button>
         </div>
       </div>
-
-      {/* Transactions Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-700">
           <thead>
             <tr>
-              {[
-                { label: "Transaction ID", field: "transactionId" },
-                { label: "Sender ID", field: "sender" },
-                { label: "Receiver ID", field: "receiver" },
-                { label: "Royalty ID", field: "royaltyId" },
-                { label: "Transaction Date", field: "transactionDate" },
-                { label: "Amount", field: "transactionAmount" },
-                { label: "Manager ID", field: "managerId" },
-                { label: "Transaction Type", field: "transactionType" },
-              ].map(({ label, field }) => (
-                <th
-                  key={field}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer"
-                  onClick={() => {
-                    setSortField(field);
-                    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-                  }}
-                >
+              {["Transaction ID", "Sender ID", "Receiver ID", "Royalty ID", "Transaction Date", "Amount", "Manager ID", "Transaction Type", "Download"].map((label, index) => (
+                <th key={index} className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   {label}
-                  <ChevronDown
-                    className={`inline ml-1 transition-transform duration-200 ${
-                      sortField === field ? (sortOrder === "desc" ? "rotate-180" : "rotate-0") : ""
-                    }`}
-                    size={16}
-                  />
                 </th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-700">
-            {paginatedTransactions.map((transaction) => (
+            {transactions.map((transaction) => (
               <motion.tr key={transaction.transactionId} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{transaction.transactionId}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{transaction.sender}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{transaction.receiver}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{transaction.royaltyId}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                  {new Date(transaction.transactionDate).toLocaleString()}
-                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{new Date(transaction.transactionDate).toLocaleString()}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">₹{transaction.transactionAmount.toFixed(2)}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{transaction.managerId}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{transaction.transactionType}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <button
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg flex items-center gap-1"
+                    onClick={() => handleDownloadPDF(transaction)}
+                  >
+                    <Download size={16} /> Download
+                  </button>
+                </td>
               </motion.tr>
             ))}
           </tbody>
         </table>
-      </div>
-
-      {/* Pagination Controls */}
-      <div className="flex justify-center mt-4">
-        <button className="mx-1 px-3 py-1 rounded-lg bg-gray-700 text-gray-300" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
-          <ChevronLeft />
-        </button>
-        {Array.from({ length: endPage - startPage + 1 }, (_, i) => i + startPage).map((page) => (
-          <button key={page} className={`mx-1 px-3 py-1 rounded-lg ${currentPage === page ? "bg-blue-500 text-white" : "bg-gray-700 text-gray-300"}`} onClick={() => handlePageChange(page)}>
-            {page}
-          </button>
-        ))}
-        <button className="mx-1 px-3 py-1 rounded-lg bg-gray-700 text-gray-300" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
-          <ChevronRight />
-        </button>
       </div>
     </motion.div>
   );

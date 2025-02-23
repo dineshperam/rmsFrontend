@@ -27,7 +27,7 @@ const AdminAllUsersTable = () => {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(5);
@@ -169,25 +169,29 @@ const AdminAllUsersTable = () => {
 
       {/* Pagination Controls */}
       <div className="flex justify-center mt-4">
-        <button 
-          className="mx-1 px-3 py-1 rounded-lg bg-gray-700 text-gray-300" 
-          onClick={() => handlePageChange(currentPage - 1)} 
+        <button
+          aria-label="previous page"
+          data-testid="prev-page"
+          className="mx-1 px-3 py-1 rounded-lg bg-gray-700 text-gray-300"
+          onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
           <ChevronLeft size={18} />
         </button>
         {[...Array(totalPages)].map((_, index) => (
-          <button 
-            key={index} 
-            className={`mx-1 px-3 py-1 rounded-lg ${currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-700 text-gray-300"}`} 
+          <button
+            key={index}
+            className={`mx-1 px-3 py-1 rounded-lg ${currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-700 text-gray-300"}`}
             onClick={() => handlePageChange(index + 1)}
           >
             {index + 1}
           </button>
         ))}
-        <button 
-          className="mx-1 px-3 py-1 rounded-lg bg-gray-700 text-gray-300" 
-          onClick={() => handlePageChange(currentPage + 1)} 
+        <button
+          aria-label="next page"
+          data-testid="next-page"
+          className="mx-1 px-3 py-1 rounded-lg bg-gray-700 text-gray-300"
+          onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
           <ChevronRight size={18} />

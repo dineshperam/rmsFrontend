@@ -90,6 +90,7 @@ const AddUser = () => {
                 role: '',
                 password: '',
                 passwordHash: '',
+                managerId: 0
             });
             setErrors({});
         }
@@ -111,39 +112,108 @@ const AddUser = () => {
         <div style={styles.container} className="flex-1 overflow-auto relative z-10 min-h-screen">
             {/* <Header title="Add User" /> */}
             <main className="mx-auto py-6 px-4 lg:px-8">
-                {message && <p style={styles.message}>{message}</p>}
                 <form onSubmit={handleSubmit} style={styles.form}>
-                    <label>First Name * </label>
-                    <input type="text" name="firstName" value={user.firstName} onChange={handleChange} required style={styles.input} />
+                    <label htmlFor="firstName">First Name *</label>
+                    <input
+                        id="firstName"
+                        type="text"
+                        name="firstName"
+                        value={user.firstName}
+                        onChange={handleChange}
+                        required
+                        style={styles.input}
+                    />
 
-                    <label>Last Name * </label>
-                    <input type="text" name="lastName" value={user.lastName} onChange={handleChange} required style={styles.input} />
+                    <label htmlFor="lastName">Last Name *</label>
+                    <input
+                        id="lastName"
+                        type="text"
+                        name="lastName"
+                        value={user.lastName}
+                        onChange={handleChange}
+                        required
+                        style={styles.input}
+                    />
 
-                    <label>Email * </label>
-                    <input type="email" name="email" value={user.email} onChange={handleChange} required style={styles.input} />
+                    <label htmlFor="email">Email *</label>
+                    <input
+                        id="email"
+                        type="email"
+                        name="email"
+                        value={user.email}
+                        onChange={handleChange}
+                        required
+                        style={styles.input}
+                    />
                     {errors.email && <span style={styles.error}>{errors.email}</span>}
 
-                    <label>Username * </label>
-                    <input type="text" name="username" value={user.username} onChange={handleChange} required style={styles.input} />
+                    <label htmlFor="username">Username *</label>
+                    <input
+                        id="username"
+                        type="text"
+                        name="username"
+                        value={user.username}
+                        onChange={handleChange}
+                        required
+                        style={styles.input}
+                    />
                     {errors.username && <span style={styles.error}>{errors.username}</span>}
 
-                    <label>Password * </label>
-                    <input type="password" name="password" value={user.password} onChange={handleChange} required style={styles.input} />
+                    <label htmlFor="password">Password *</label>
+                    <input
+                        id="password"
+                        type="password"
+                        name="password"
+                        value={user.password}
+                        onChange={handleChange}
+                        required
+                        style={styles.input}
+                    />
                     {errors.password && <span style={styles.error}>{errors.password}</span>}
 
-                    <label>Confirm Password * </label>
-                    <input type="password" name="passwordHash" value={user.passwordHash} onChange={handleChange} required style={styles.input} />
+                    <label htmlFor="passwordHash">Confirm Password *</label>
+                    <input
+                        id="passwordHash"
+                        type="password"
+                        name="passwordHash"
+                        value={user.passwordHash}
+                        onChange={handleChange}
+                        required
+                        style={styles.input}
+                    />
                     {errors.passwordHash && <span style={styles.error}>{errors.passwordHash}</span>}
 
-                    <label>Mobile Number * </label>
-                    <input type="text" name="mobileNo" value={user.mobileNo} onChange={handleChange} required style={styles.input} />
+                    <label htmlFor="mobileNo">Mobile Number *</label>
+                    <input
+                        id="mobileNo"
+                        type="text"
+                        name="mobileNo"
+                        value={user.mobileNo}
+                        onChange={handleChange}
+                        required
+                        style={styles.input}
+                    />
                     {errors.mobileNo && <span style={styles.error}>{errors.mobileNo}</span>}
 
-                    <label>Address</label>
-                    <input type="text" name="address" value={user.address} onChange={handleChange} style={styles.input} />
+                    <label htmlFor="address">Address</label>
+                    <input
+                        id="address"
+                        type="text"
+                        name="address"
+                        value={user.address}
+                        onChange={handleChange}
+                        style={styles.input}
+                    />
 
-                    <label>Role * </label>
-                    <select name="role" value={user.role} onChange={handleChange} required style={styles.select}>
+                    <label htmlFor="role">Role *</label>
+                    <select
+                        id="role"
+                        name="role"
+                        value={user.role}
+                        onChange={handleChange}
+                        required
+                        style={styles.select}
+                    >
                         <option value="">Select Role</option>
                         <option value="Artist">Artist</option>
                         <option value="Manager">Manager</option>
@@ -155,12 +225,11 @@ const AddUser = () => {
                     <br />
                     {message && <p style={styles.message}>{message}</p>}
                     <br />
-                    
-                    <button type="submit" style={styles.button} disabled={Object.values(errors).some(error => error !== "")}>
-                    {loadingSubmit ? "Adding..." : "Add User"}
+
+                    <button type="submit" style={styles.button} disabled={loadingSubmit || Object.values(errors).some(error => error !== "")}>
+                        {loadingSubmit ? "Adding..." : "Add User"}
                     </button>
-                    
-                    
+
                 </form>
             </main>
         </div>

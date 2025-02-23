@@ -1,24 +1,26 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import ApiService from "../../../service/ApiService";
- 
+import { toast } from "react-toastify";
+
 const ArtistRequests = () => {
   const [managers, setManagers] = useState([]);
   const [existingManager, setExistingManager] = useState(null);
   const [partnershipDetails, setPartnershipDetails] = useState(null);
   const [selectedManager, setSelectedManager] = useState(null);
   const [requestSent, setRequestSent] = useState(false);
- 
+  const [percentageError, setPercentageError] = useState("");
+
   // Partnership Request Form Data
   const [formData, setFormData] = useState({
     percentage: 10,
     duration: 3,
     comments: "",
   });
- 
+
   const artistId = ApiService.getUserId();
   const adminId = 6;
- 
+
   useEffect(() => {
     const fetchManagers = async () => {
       try {
@@ -28,7 +30,7 @@ const ArtistRequests = () => {
         console.error("Error fetching managers:", error);
       }
     };
- 
+
     const fetchArtistManager = async () => {
       try {
         const managerId = ApiService.getManagerId();
@@ -40,7 +42,7 @@ const ArtistRequests = () => {
         console.error("Error fetching artist's manager:", error);
       }
     };
- 
+
     const fetchPartnershipDetails = async (artistId) => {
       try {
         const response = await ApiService.getArtistPartnership(artistId);
@@ -49,49 +51,67 @@ const ArtistRequests = () => {
         console.error("Error fetching partnership details:", error);
       }
     };
- 
+
     fetchManagers();
     fetchArtistManager();
   }, [artistId]);
- 
+
   const handlePartnerClick = (managerId) => {
     setSelectedManager(managerId);
   };
- 
+
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    // Real-time validation for percentage field
+    if (name === "percentage") {
+      const numValue = Number(value);
+      if (numValue > 30) {
+        setPercentageError("Quote share percentage cannot be greater than 30%");
+      } else if (numValue < 1) {
+        setPercentageError("Quote share percentage cannot be less than 1%");
+      } else {
+        setPercentageError("");
+      }
+    }
+    setFormData({ ...formData, [name]: value });
   };
- 
+
   const submitRequest = async () => {
     if (!selectedManager) {
-        alert("Please select a manager before submitting a request.");
-        return;
+      toast.error("Please select a manager before submitting a request.");
+      return;
     }
- 
+    // Prevent submission if there's a validation error
+    if (percentageError) {
+      return;
+    }
+
     const requestPayload = {
-        artistId: artistId ? Number(artistId) : null,
-        managerId: selectedManager ? Number(selectedManager) : null,
-        percentage: formData.percentage ? Number(formData.percentage) : null,
-        durationMonths: formData.duration ? Number(formData.duration) : null,
-        comments: formData.comments ? formData.comments.trim() : "",
+      artistId: artistId ? Number(artistId) : null,
+      managerId: selectedManager ? Number(selectedManager) : null,
+      percentage: formData.percentage ? Number(formData.percentage) : null,
+      durationMonths: formData.duration ? Number(formData.duration) : null,
+      comments: formData.comments ? formData.comments.trim() : "",
     };
- 
+
     console.log("Submitting Request Payload:", requestPayload); // Debugging log
- 
+
     try {
-        await ApiService.sendPartnershipRequest(
-            requestPayload.artistId,
-            requestPayload.managerId,
-            requestPayload.percentage,
-            requestPayload.durationMonths,
-            requestPayload.comments
-        );
-        setRequestSent(true);
+      await ApiService.sendPartnershipRequest(
+        requestPayload.artistId,
+        requestPayload.managerId,
+        requestPayload.percentage,
+        requestPayload.durationMonths,
+        requestPayload.comments
+      );
+      setRequestSent(true);
+      // Clear error messages after successful submission
+      setPercentageError("");
     } catch (error) {
-        alert(error.response?.data || "Failed to send request. Please try again.");
+      toast.error(error.response?.data || "Failed to send request. Please try again.");
     }
-};
- 
+  };
+
   const exportPDF = async () => {
     try {
       const pdfBlob = await ApiService.exportPartnershipPDF(artistId);
@@ -103,10 +123,10 @@ const ArtistRequests = () => {
       link.click();
       link.remove();
     } catch (error) {
-      alert("Failed to export PDF. Please try again.");
+      toast.error("Failed to export PDF. Please try again.");
     }
   };
- 
+
   return (
     <motion.div
       className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700 min-h-screen"
@@ -126,7 +146,7 @@ const ArtistRequests = () => {
             </button>
           )}
         </div>
- 
+
         {existingManager ? (
           <>
             {partnershipDetails ? (
@@ -147,7 +167,7 @@ const ArtistRequests = () => {
                       <td className="border border-gray-600 px-4 py-2">{partnershipDetails.status}</td>
                     </tr>
                     <tr>
-                      <td className="border border-gray-600 px-4 py-2">percentage</td>
+                      <td className="border border-gray-600 px-4 py-2">Percentage</td>
                       <td className="border border-gray-600 px-4 py-2">{partnershipDetails.percentage}</td>
                     </tr>
                     <tr>
@@ -189,10 +209,13 @@ const ArtistRequests = () => {
               name="percentage"
               value={formData.percentage}
               onChange={handleInputChange}
-              className="w-full p-2 mb-3 rounded bg-gray-600 text-white"
+              className="w-full p-2 mb-1 rounded bg-gray-600 text-white"
               min="1"
-              max="100"
+              max="30"
             />
+            {percentageError && (
+              <p className="text-red-500 text-sm">{percentageError}</p>
+            )}
             <label className="text-gray-300 block mb-2">Duration (Months)</label>
             <select
               name="duration"
@@ -218,7 +241,11 @@ const ArtistRequests = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {managers.map((manager, index) => (
               <motion.div key={index} className="bg-gray-700 p-4 rounded-lg shadow-md text-center">
-                <p className="text-lg font-semibold text-white">{manager.username}</p>
+                <p className="text-lg font-normal text-white">
+                  Name : {manager.firstName} {manager.lastName}
+                </p>
+                <p className="text-lg font-normal text-white">UserId : {manager.userid}</p>
+                <p className="text-lg font-normal text-white">{manager.email}</p>
                 <button
                   onClick={() => handlePartnerClick(manager.userid)}
                   className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 mt-3 rounded-lg"
@@ -233,5 +260,5 @@ const ArtistRequests = () => {
     </motion.div>
   );
 };
- 
+
 export default ArtistRequests;
