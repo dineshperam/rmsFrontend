@@ -1,0 +1,6 @@
+projectKey=dashboard-react
+serverUrl=http://localhost:1001
+serverVersion=25.2.0.102705
+dashboardUrl=http://localhost:1001/dashboard?id=dashboard-react
+ceTaskId=89316544-3ed4-4994-b3b9-2f9cdb451efa
+ceTaskUrl=http://localhost:1001/api/ce/task?id=89316544-3ed4-4994-b3b9-2f9cdb451efa

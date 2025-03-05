@@ -16,7 +16,9 @@ module.exports = {
   collectCoverage: true,
   collectCoverageFrom: [
     "src/**/*.{js,jsx}",
-    "!src/setupTests.js" // Exclude setup file or any other files if needed
+    "!src/setupTests.js", // Exclude setup file or any other files if needed
+    "!src/**/*.test.js"
   ],
-  coverageDirectory: "coverage"
+  coverageDirectory: "coverage",
+  coverageReporters: ["lcov", "text-summary"] // Ensure LCOV format is included
 };

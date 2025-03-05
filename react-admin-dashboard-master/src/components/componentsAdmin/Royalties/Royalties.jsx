@@ -49,7 +49,7 @@ const Royalties = () => {
   };
 
   const handlePayment = async (royalty) => {
-    if (!window.confirm(`Process payment of ₹${royalty.royaltyAmount}?`)) return;
+    if (!window.confirm(`Process payment of ₹${royalty.royaltyAmount.toFixed(2)}?`)) return;
 
     setLoadingId(royalty.royaltyId);
 
